@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="华语电视">
+<meta name="theme-color" content="#0f2a3d">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="manifest" href="manifest.json">
+<title>华语电视</title>
+<style>
+/* VOICE: 清爽、像电视节目单
+   IDEA: 一台电视 + 下方频道遥控列表
+   PICTURE: 顶部 16:9 播放画面
+   COLOUR and TYPE: 深海蓝底，白字，番茄红强调；系统中文字体
+   LAYOUT: 画面 → 地区标签 → 搜索 → 频道列表 */
+:root{--bg:#0f2a3d;--panel:#163a52;--ink:#f1f6f9;--dim:#9fb6c5;--red:#ff5a3c;--line:#24506b}
+*{box-sizing:border-box;min-width:0}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 -apple-system,"PingFang SC","Noto Sans SC",sans-serif;overflow-x:clip;
+ padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)}
+.wrap{max-width:820px;margin:0 auto}
+.screen{position:sticky;top:0;z-index:5;background:#000;aspect-ratio:16/9;width:100%}
+video{width:100%;height:100%;display:block;background:#000}
+.idle{position:absolute;inset:0;display:grid;place-items:center;text-align:center;color:var(--dim);padding:20px;pointer-events:none}
+.bar{padding:12px 14px 4px}
+.nm{font-size:19px;font-weight:600;overflow-wrap:anywhere}
+.meta{color:var(--dim);font-size:13px}
+.tabs{display:flex;gap:8px;overflow-x:auto;padding:10px 14px;scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+button{font:inherit;color:var(--ink);background:var(--panel);border:1px solid var(--line);border-radius:999px;min-height:40px;padding:0 14px;cursor:pointer;flex:none}
+button.act{background:var(--red);border-color:var(--red);color:#fff;font-weight:600}
+button:focus-visible,input:focus-visible{outline:2px solid #fff;outline-offset:2px}
+.tools{display:flex;gap:8px;padding:0 14px 8px;align-items:center}
+input[type=search]{flex:1;font:inherit;font-size:16px;color:var(--ink);background:var(--panel);border:1px solid var(--line);border-radius:12px;min-height:44px;padding:0 12px}
+.small{font-size:13px;color:var(--dim);padding:0 14px 6px;display:flex;gap:8px;align-items:center}
+.small input{width:20px;height:20px;accent-color:var(--red)}
+ul{list-style:none;margin:0;padding:0 6px 30px}
+li{display:flex;gap:12px;align-items:center;padding:9px 8px;border-bottom:1px solid var(--line);cursor:pointer}
+li.cur{background:#ff5a3c22}
+.logo{width:56px;height:38px;border-radius:6px;background:#fff center/contain no-repeat;flex:none;display:grid;place-items:center;color:#0f2a3d;font-weight:700;font-size:13px}
+li .t{flex:1}li .t b{display:block;font-weight:600;overflow-wrap:anywhere}
+.fav{background:none;border:0;min-width:44px;font-size:20px;color:var(--dim);padding:0}
+.fav.y{color:#ffc93c}
+.empty{color:var(--dim);text-align:center;padding:30px 10px;display:block;cursor:default;border:0}
+.foot{color:var(--dim);font-size:12px;padding:0 14px 30px}
+</style>
+</head>
+<body>
+<div class="wrap">
+<div class="screen">
+  <video id="v" controls playsinline webkit-playsinline></video>
+  <div class="idle" id="idle">选一个频道开始收看</div>
+</div>
+<div class="bar"><div class="nm" id="nm">华语电视</div><div class="meta" id="st">新加坡 · 港澳台 · 大陆 · 海外华语</div></div>
+<div class="tabs" id="tabs"></div>
+<div class="tools"><input type="search" id="q" placeholder="搜频道，例如 CCTV、TVB、凤凰、Channel 8"></div>
+<label class="small"><input type="checkbox" id="safe">只显示 https 源（装到桌面后，http 源在 iPhone 上播不了）</label>
+<ul id="list"><li class="empty">正在加载频道…</li></ul>
+<p class="foot">频道清单来自开源项目 iptv-org 收录的公开直播源，并非电视台官方提供，有的频道会失效或被地区限制，换一个即可。</p>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/hls.js@1.5.15/dist/hls.min.js"></script>
+<script>
+{
+const $=s=>document.querySelector(s);
+const B='https://iptv-org.github.io/iptv/';
+const REG=[
+ {k:'fav',n:'收藏'},{k:'recent',n:'最近'},
+ {k:'sg',n:'新加坡',u:'countries/sg.m3u'},{k:'hk',n:'香港',u:'countries/hk.m3u'},
+ {k:'tw',n:'台湾',u:'countries/tw.m3u'},{k:'mo',n:'澳门',u:'countries/mo.m3u'},
+ {k:'cn',n:'大陆',u:'countries/cn.m3u'},{k:'my',n:'马来西亚',u:'countries/my.m3u'},
+ {k:'zho',n:'全球华语',u:'languages/zho.m3u'},{k:'yue',n:'粤语',u:'languages/yue.m3u'}];
+const store={get(k,d){try{return JSON.parse(localStorage.getItem(k))??d}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
+let favs=store.get('tv_favs',[]),recent=store.get('tv_recent',[]),tab=store.get('tv_tab','sg'),cache={},all=[],shown=[],cur=null,hls=null;
+const v=$('#v');
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const safeBox=$('#safe');safeBox.checked=store.get('tv_safe',location.protocol==='https:');
+
+function parse(txt){
+  const out=[],L=txt.split(/\r?\n/);let info=null;
+  for(const l of L){
+    if(l.startsWith('#EXTINF')){
+      const a=k=>(l.match(new RegExp(k+'="([^"]*)"'))||[])[1]||'';
+      info={name:l.slice(l.lastIndexOf(',')+1).trim(),logo:a('tvg-logo'),group:a('group-title'),id:a('tvg-id')};
+    }else if(info&&l&&!l.startsWith('#')){info.url=l.trim();info.key=info.url;out.push(info);info=null}
+  }
+  return out;
+}
+async function getList(r){
+  if(cache[r.k])return cache[r.k];
+  const res=await fetch(B+r.u);if(!res.ok)throw new Error('频道清单加载失败');
+  return cache[r.k]=parse(await res.text());
+}
+$('#tabs').innerHTML=REG.map(r=>`<button data-k="${r.k}">${r.n}</button>`).join('');
+
+async function load(k){
+  tab=k;store.set('tv_tab',k);
+  document.querySelectorAll('#tabs button').forEach(b=>b.classList.toggle('act',b.dataset.k===k));
+  if(k==='fav'){all=favs.slice();filter();return}
+  if(k==='recent'){all=recent.slice();filter();return}
+  $('#list').innerHTML='<li class="empty">加载中…</li>';
+  try{all=await getList(REG.find(r=>r.k===k));filter()}
+  catch(e){$('#list').innerHTML=`<li class="empty">${e.message}，请检查网络后重试</li>`}
+}
+function filter(){
+  const q=$('#q').value.trim().toLowerCase();
+  shown=all.filter(c=>(!safeBox.checked||c.url.startsWith('https:'))&&(!q||(c.name+' '+c.group).toLowerCase().includes(q)));
+  render();
+}
+const isFav=c=>favs.some(f=>f.key===c.key);
+function render(){
+  const L=$('#list');
+  if(!shown.length){L.innerHTML=`<li class="empty">${tab==='fav'?'还没有收藏，点频道右边的 ☆':tab==='recent'?'还没有观看记录':'这里没有符合条件的频道'+(safeBox.checked?'，可以试试取消勾选上面的 https 选项':'')}</li>`;return}
+  L.innerHTML=shown.slice(0,400).map((c,i)=>`<li data-i="${i}" class="${cur&&cur.key===c.key?'cur':''}">
+    <div class="logo" ${c.logo?`data-logo="${esc(c.logo)}"`:''}>${c.logo?'':esc(c.name.slice(0,3))}</div>
+    <div class="t"><b>${esc(c.name)}</b><span class="meta">${esc(c.group||'')}${c.url.startsWith('https:')?'':' · http'}</span></div>
+    <button class="fav ${isFav(c)?'y':''}" data-f="${i}" aria-label="收藏">${isFav(c)?'★':'☆'}</button></li>`).join('');
+  L.querySelectorAll('[data-logo]').forEach(el=>{const im=new Image();im.onload=()=>el.style.backgroundImage=`url("${im.src}")`;im.onerror=()=>el.textContent=el.closest('li').querySelector('b').textContent.slice(0,3);im.src=el.dataset.logo});
+}
+function msg(t){$('#st').textContent=t}
+async function play(c){
+  cur=c;$('#nm').textContent=c.name;$('#idle').hidden=true;msg('连接中…');render();
+  recent=[c,...recent.filter(r=>r.key!==c.key)].slice(0,40);store.set('tv_recent',recent);
+  try{if(hls){hls.destroy();hls=null}}catch(e){}
+  if(v.canPlayType('application/vnd.apple.mpegurl')){v.src=c.url}
+  else if(window.Hls&&Hls.isSupported()){hls=new Hls();hls.loadSource(c.url);hls.attachMedia(v);
+    hls.on(Hls.Events.ERROR,(e,d)=>{if(d.fatal)msg('这个频道暂时无法播放，换一个试试')})}
+  else v.src=c.url;
+  try{await v.play()}catch(e){msg('点画面上的播放键开始；若仍无画面，换一个频道')}
+}
+v.addEventListener('playing',()=>msg((cur&&cur.group?cur.group+' · ':'')+'正在播放'));
+v.addEventListener('waiting',()=>msg('缓冲中…'));
+v.addEventListener('error',()=>{if(cur)msg('这个频道暂时无法播放，换一个试试')});
+
+function toggleFav(c){favs=isFav(c)?favs.filter(f=>f.key!==c.key):[c,...favs];store.set('tv_favs',favs);if(tab==='fav')all=favs.slice();filter()}
+$('#tabs').onclick=e=>{const b=e.target.closest('button');if(b)load(b.dataset.k)};
+$('#list').onclick=e=>{const f=e.target.closest('[data-f]');if(f){e.stopPropagation();toggleFav(shown[+f.dataset.f]);return}
+  const li=e.target.closest('li[data-i]');if(li){play(shown[+li.dataset.i])}};
+$('#q').oninput=filter;
+safeBox.onchange=()=>{store.set('tv_safe',safeBox.checked);filter()};
+load(tab);
+}
+</script>
+</body>
+</html>
