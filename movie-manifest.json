@@ -1,0 +1,1 @@
+{"name":"我的片单","short_name":"我的片单","start_url":"./movies.html","display":"standalone","background_color":"#f4f1ea","theme_color":"#1f2a44","icons":[{"src":"movie-icon-180.png","sizes":"180x180","type":"image/png"},{"src":"movie-icon-512.png","sizes":"512x512","type":"image/png"}]}

@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="我的片单">
+<meta name="theme-color" content="#1f2a44">
+<link rel="apple-touch-icon" href="movie-icon-180.png">
+<link rel="manifest" href="movie-manifest.json">
+<title>我的片单</title>
+<style>
+/* VOICE: 安静、像影院售票处的片单板
+   IDEA: 一张张电影票根
+   PICTURE: 深蓝顶栏，下方票根式卡片，琥珀色星级
+   COLOUR and TYPE: 深夜蓝 + 琥珀；系统中文字体
+   LAYOUT: 顶栏 → 想看/看过 → 筛选 → 列表；底部加片按钮 */
+:root{--bg:#f4f1ea;--card:#fff;--ink:#1f2a44;--dim:#6f7891;--amb:#e09a12;--line:#e2ddd2}
+@media(prefers-color-scheme:dark){:root:not([data-theme=light]){--bg:#121826;--card:#1c2436;--ink:#eef1f7;--dim:#98a2ba;--line:#2c3650}}
+:root[data-theme=dark]{--bg:#121826;--card:#1c2436;--ink:#eef1f7;--dim:#98a2ba;--line:#2c3650}
+*{box-sizing:border-box;min-width:0}
+body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.55 -apple-system,"PingFang SC","Noto Sans SC",sans-serif;overflow-x:clip}
+header{background:#1f2a44;color:#fff;padding:calc(env(safe-area-inset-top) + 14px) 16px 0;position:sticky;top:0;z-index:5}
+header .top{display:flex;align-items:center;gap:10px}
+header h1{font-size:22px;margin:0;flex:1}
+.tabs{display:flex;gap:4px;margin-top:10px}
+.tabs button{flex:1;background:none;border:0;border-bottom:3px solid transparent;border-radius:0;color:#ffffffaa;font-size:16px}
+.tabs .act{color:#fff;border-bottom-color:var(--amb);font-weight:700}
+.wrap{max-width:760px;margin:0 auto;padding:12px 14px calc(110px + env(safe-area-inset-bottom))}
+button{font:inherit;color:var(--ink);background:var(--card);border:1px solid var(--line);border-radius:12px;min-height:44px;padding:0 14px;cursor:pointer}
+button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible,a:focus-visible{outline:2px solid var(--amb);outline-offset:2px}
+.pri{background:var(--amb);border-color:var(--amb);color:#1f2a44;font-weight:700}
+input,textarea,select{font:inherit;font-size:16px;color:var(--ink);background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 12px;width:100%}
+.bar{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px}
+.chips{display:flex;gap:8px;overflow-x:auto;padding:10px 0;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.chips button{flex:none;border-radius:999px;min-height:36px;font-size:15px}
+.chips .act{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.tk{background:var(--card);border:1px solid var(--line);border-radius:14px;margin:10px 0;display:flex;overflow:hidden;cursor:pointer}
+.tk .stub{width:14px;background:var(--amb);flex:none}
+.tk.seen .stub{background:#3f8f5b}
+.tk .body{padding:12px 14px;flex:1}
+.tk b{font-size:18px;display:block}
+.meta{color:var(--dim);font-size:14px}
+.stars{color:var(--amb);letter-spacing:2px}
+.note{font-size:15px;margin-top:4px;overflow-wrap:anywhere}
+.empty{color:var(--dim);text-align:center;padding:40px 10px}
+.fab{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(18px + env(safe-area-inset-bottom));z-index:6;border-radius:999px;padding:0 26px;min-height:52px;box-shadow:0 6px 20px #0004}
+dialog{border:0;border-radius:18px;padding:0;width:min(560px,94vw);background:var(--card);color:var(--ink)}
+dialog::backdrop{background:#0008}
+.dl{padding:18px}
+.dl h2{margin:0 0 6px;font-size:22px}
+label.f{display:block;margin:12px 0 6px;font-weight:600;font-size:15px}
+.two{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px}
+.rate{display:flex;gap:4px}
+.rate button{border:0;background:none;font-size:30px;color:var(--line);min-width:44px;padding:0}
+.rate button.on{color:var(--amb)}
+.seg{display:flex;gap:8px}.seg button{flex:1}.seg .act{background:var(--ink);color:var(--bg)}
+.row{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.links{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px;margin-top:10px}
+.links a{display:flex;align-items:center;justify-content:center;min-height:44px;border:1px solid var(--line);border-radius:12px;color:var(--ink);text-decoration:none;font-size:15px}
+.small{font-size:13px;color:var(--dim);margin-top:10px}
+textarea{min-height:80px}
+</style>
+</head>
+<body>
+<header><div class="top"><h1>我的片单</h1><button id="more" style="background:#ffffff22;color:#fff;border:0">⋯</button></div>
+<div class="tabs" id="tabs"><button data-s="want" class="act">想看</button><button data-s="seen">看过</button><button data-s="all">全部</button></div></header>
+<div class="wrap">
+  <div class="bar"><input type="search" id="q" placeholder="搜片名、导演、备注"><select id="sort" aria-label="排序"><option value="new">最近添加</option><option value="rate">评分高</option><option value="year">年份新</option><option value="name">片名</option></select></div>
+  <div class="chips" id="regs"></div>
+  <div id="list"></div>
+</div>
+<button class="pri fab" id="add">＋ 记一部电影</button>
+
+<dialog id="dEdit"><form class="dl" id="fEdit" method="dialog">
+  <h2 id="eT">记一部电影</h2>
+  <label class="f" for="fn">片名</label><input id="fn" required placeholder="比如：踏血寻梅">
+  <div class="two"><div><label class="f" for="fy">年份</label><input id="fy" type="number" inputmode="numeric" placeholder="2015"></div>
+  <div><label class="f" for="fr">地区</label><select id="fr"></select></div></div>
+  <label class="f" for="fd">导演 / 主演（可不填）</label><input id="fd">
+  <label class="f">状态</label><div class="seg" id="fs"><button type="button" data-v="want">想看</button><button type="button" data-v="seen">看过</button></div>
+  <div id="rateBox"><label class="f">我的评分</label><div class="rate" id="frate"></div></div>
+  <label class="f" for="fno">短评 / 备注</label><textarea id="fno" placeholder="谁推荐的、在哪个平台有、看完的感受…"></textarea>
+  <div class="row"><button class="pri" type="submit" value="ok">保存</button><button type="button" id="eCancel">取消</button><button type="button" id="eDel" hidden>删除</button></div>
+</form></dialog>
+
+<dialog id="dView"><div class="dl" id="vBody"></div></dialog>
+
+<dialog id="dMore"><div class="dl">
+  <h2>更多</h2>
+  <button id="seed" style="width:100%;margin-top:8px">加入一份推荐片单（8 部口碑港韩日片）</button>
+  <label class="f" for="bk">备份 / 换手机</label>
+  <textarea id="bk" placeholder="点「复制备份」后，把内容发给自己；在新手机粘贴到这里，再点「恢复」"></textarea>
+  <div class="row"><button id="bkCopy">复制备份</button><button id="bkLoad">恢复</button><button id="mClose">关闭</button></div>
+  <p class="small" id="bkMsg">片单只存在这台手机上。换手机或清理浏览器前，记得先复制备份。</p>
+</div></dialog>
+<script>
+{
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const REGS=['香港','韩国','日本','台湾','大陆','欧美','其他'];
+const store={get(k,d){try{return JSON.parse(localStorage.getItem(k))??d}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
+let M=store.get('mv_list',[]),st=store.get('mv_tab','want'),reg='全部',q='',sort='new',edit=null,fState='want',fRate=0;
+const save=()=>store.set('mv_list',M);
+const stars=n=>n?'★'.repeat(n)+'☆'.repeat(5-n):'';
+const SEED=[['色，戒',2007,'台湾','李安 / 梁朝伟、汤唯'],['踏血寻梅',2015,'香港','翁子光 / 郭富城、春夏'],['黑社会',2005,'香港','杜琪峰 / 梁家辉、任达华'],['小姐',2016,'韩国','朴赞郁 / 金敏喜、金泰梨'],['老男孩',2003,'韩国','朴赞郁 / 崔岷植'],['寄生虫',2019,'韩国','奉俊昊 / 宋康昊'],['告白',2010,'日本','中岛哲也 / 松隆子'],['小偷家族',2018,'日本','是枝裕和 / 中川雅也、安藤樱']];
+
+$('#regs').innerHTML=['全部',...REGS].map(r=>`<button data-r="${r}" class="${r==='全部'?'act':''}">${r}</button>`).join('');
+$('#fr').innerHTML=REGS.map(r=>`<option>${r}</option>`).join('');
+$('#frate').innerHTML=[1,2,3,4,5].map(n=>`<button type="button" data-n="${n}" aria-label="${n}星">★</button>`).join('');
+
+function render(){
+  document.querySelectorAll('#tabs button').forEach(b=>b.classList.toggle('act',b.dataset.s===st));
+  document.querySelectorAll('#regs button').forEach(b=>b.classList.toggle('act',b.dataset.r===reg));
+  let L=M.filter(m=>(st==='all'||m.s===st)&&(reg==='全部'||m.r===reg)&&(!q||(m.n+' '+(m.d||'')+' '+(m.no||'')).toLowerCase().includes(q.toLowerCase())));
+  L.sort(sort==='rate'?(a,b)=>(b.rt||0)-(a.rt||0):sort==='year'?(a,b)=>(b.y||0)-(a.y||0):sort==='name'?(a,b)=>a.n.localeCompare(b.n,'zh'):(a,b)=>b.t-a.t);
+  const cnt=M.filter(m=>st==='all'||m.s===st).length;
+  $('#list').innerHTML=L.length?`<p class="meta">共 ${L.length} 部${L.length!==cnt?'（筛选后）':''}</p>`+L.map(m=>`<div class="tk ${m.s==='seen'?'seen':''}" data-id="${m.id}"><div class="stub"></div><div class="body"><b>${esc(m.n)}</b><div class="meta">${[m.y,m.r,m.d].filter(Boolean).map(esc).join(' · ')}</div>${m.rt?`<div class="stars">${stars(m.rt)}</div>`:''}${m.no?`<div class="note">${esc(m.no)}</div>`:''}</div></div>`).join('')
+   :`<p class="empty">${M.length?'这里没有符合条件的电影':'还没有记录。点下面"＋ 记一部电影"，<br>或者右上角 ⋯ 加入一份推荐片单。'}</p>`;
+}
+function setSeg(){document.querySelectorAll('#fs button').forEach(b=>b.classList.toggle('act',b.dataset.v===fState));$('#rateBox').style.display=fState==='seen'?'':'none'}
+function setRate(){document.querySelectorAll('#frate button').forEach(b=>b.classList.toggle('on',+b.dataset.n<=fRate))}
+function openEdit(m){
+  edit=m||null;$('#eT').textContent=m?'修改':'记一部电影';
+  $('#fn').value=m?.n||'';$('#fy').value=m?.y||'';$('#fr').value=m?.r||(reg!=='全部'?reg:'香港');$('#fd').value=m?.d||'';$('#fno').value=m?.no||'';
+  fState=m?.s||(st==='seen'?'seen':'want');fRate=m?.rt||0;setSeg();setRate();
+  $('#eDel').hidden=!m;$('#eDel').textContent='删除';delete $('#eDel').dataset.c;
+  $('#dEdit').showModal();
+}
+function openView(m){
+  const k=encodeURIComponent(m.n);
+  $('#vBody').innerHTML=`<h2>${esc(m.n)}</h2><div class="meta">${[m.y,m.r,m.d].filter(Boolean).map(esc).join(' · ')}</div>
+  ${m.rt?`<div class="stars" style="font-size:22px">${stars(m.rt)}</div>`:''}${m.no?`<p class="note">${esc(m.no)}</p>`:''}
+  <p class="small">去正版平台找这部片（打开后在平台里搜索，有没有要看你所在地区的片库）：</p>
+  <div class="links">
+   <a href="https://www.netflix.com/search?q=${k}" target="_blank" rel="noopener">Netflix</a>
+   <a href="https://tv.apple.com/search?term=${k}" target="_blank" rel="noopener">Apple TV</a>
+   <a href="https://play.google.com/store/search?q=${k}&c=movies" target="_blank" rel="noopener">Google Play</a>
+   <a href="https://www.youtube.com/results?search_query=${k}+%E7%94%B5%E5%BD%B1" target="_blank" rel="noopener">YouTube</a>
+   <a href="https://search.douban.com/movie/subject_search?search_text=${k}" target="_blank" rel="noopener">豆瓣（看评价）</a>
+   <a href="https://www.imdb.com/find/?q=${k}" target="_blank" rel="noopener">IMDb（看评价）</a>
+  </div>
+  <div class="row"><button class="pri" id="vSeen">${m.s==='seen'?'改回想看':'标为看过'}</button><button id="vEdit">修改</button><button id="vClose">关闭</button></div>`;
+  $('#vSeen').onclick=()=>{$('#dView').close();if(m.s==='seen'){m.s='want';save();render()}else{openEdit(m);fState='seen';setSeg()}};
+  $('#vEdit').onclick=()=>{$('#dView').close();openEdit(m)};
+  $('#vClose').onclick=()=>$('#dView').close();
+  $('#dView').showModal();
+}
+$('#fs').onclick=e=>{const b=e.target.closest('button');if(b){fState=b.dataset.v;setSeg()}};
+$('#frate').onclick=e=>{const b=e.target.closest('button');if(b){const n=+b.dataset.n;fRate=fRate===n?0:n;setRate()}};
+$('#fEdit').onsubmit=e=>{e.preventDefault();const n=$('#fn').value.trim();if(!n)return;
+  const rec={n,y:+$('#fy').value||'',r:$('#fr').value,d:$('#fd').value.trim(),s:fState,rt:fState==='seen'?fRate:0,no:$('#fno').value.trim()};
+  if(edit)Object.assign(edit,rec);else M.unshift({id:Date.now()+''+Math.random().toString(36).slice(2,6),t:Date.now(),...rec});
+  save();$('#dEdit').close();if(st!=='all'&&st!==fState){st=fState;store.set('mv_tab',st)}render()};
+$('#eCancel').onclick=()=>$('#dEdit').close();
+$('#eDel').onclick=()=>{const b=$('#eDel');if(b.dataset.c){M=M.filter(x=>x!==edit);save();$('#dEdit').close();render()}else{b.dataset.c=1;b.textContent='再点一次确认'}};
+$('#list').onclick=e=>{const t=e.target.closest('.tk');if(t)openView(M.find(m=>m.id===t.dataset.id))};
+$('#tabs').onclick=e=>{const b=e.target.closest('button');if(b){st=b.dataset.s;store.set('mv_tab',st);render()}};
+$('#regs').onclick=e=>{const b=e.target.closest('button');if(b){reg=b.dataset.r;render()}};
+$('#q').oninput=e=>{q=e.target.value.trim();render()};
+$('#sort').onchange=e=>{sort=e.target.value;render()};
+$('#add').onclick=()=>openEdit(null);
+$('#more').onclick=()=>{$('#bkMsg').textContent='片单只存在这台手机上。换手机或清理浏览器前，记得先复制备份。';$('#dMore').showModal()};
+$('#mClose').onclick=()=>$('#dMore').close();
+$('#seed').onclick=()=>{let k=0;SEED.forEach(([n,y,r,d],i)=>{if(!M.some(m=>m.n===n)){M.push({id:'s'+i+Date.now(),t:Date.now()-i,n,y,r,d,s:'want',rt:0,no:''});k++}});save();st='want';render();$('#seed').textContent=k?`已加入 ${k} 部`:'都已经在片单里了'};
+$('#bkCopy').onclick=()=>{const txt=JSON.stringify(M);$('#bk').value=txt;navigator.clipboard.writeText(txt).then(()=>$('#bkMsg').textContent='已复制。可以粘贴到微信"文件传输助手"或备忘录里保存。').catch(()=>$('#bkMsg').textContent='自动复制没成功：内容已放在上面的框里，长按全选后复制。')};
+$('#bkLoad').onclick=()=>{try{const a=JSON.parse($('#bk').value);if(!Array.isArray(a))throw 0;let k=0;a.forEach(m=>{if(m&&m.n&&!M.some(x=>x.n===m.n&&x.y==m.y)){M.push({id:m.id||Date.now()+''+k,t:m.t||Date.now(),n:m.n,y:m.y||'',r:m.r||'其他',d:m.d||'',s:m.s==='seen'?'seen':'want',rt:+m.rt||0,no:m.no||''});k++}});save();render();$('#bkMsg').textContent=`恢复了 ${k} 部（重复的已跳过）`}catch(e){$('#bkMsg').textContent='内容格式不对，请粘贴完整的备份内容'}};
+render();
+}
+</script>
+</body>
+</html>
