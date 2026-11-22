@@ -12,75 +12,100 @@
 <link rel="manifest" href="cook-manifest.json">
 <title>家常菜谱</title>
 <style>
-/* VOICE: 温暖、实用、像厨房里贴的菜谱卡
-   IDEA: 一叠菜谱卡片 + 做菜时的步骤计时
-   PICTURE: 顶部辣椒红标题栏，下面是菜谱卡片列表
-   COLOUR and TYPE: 暖白底、酱油棕字、辣椒红强调；系统中文字体，大字号便于做菜时看
-   LAYOUT: 顶栏 → 分类 → 列表；详情页：食材勾选 → 步骤带计时 */
-:root{--bg:#fbf6ee;--card:#fff;--ink:#3a2a1e;--dim:#8a7462;--red:#c8402b;--line:#eadfce;--green:#3f7d4e}
-@media(prefers-color-scheme:dark){:root:not([data-theme=light]){--bg:#1d1714;--card:#2a221d;--ink:#f3e9dc;--dim:#b09a86;--line:#3d322a}}
-:root[data-theme=dark]{--bg:#1d1714;--card:#2a221d;--ink:#f3e9dc;--dim:#b09a86;--line:#3d322a}
+/* VOICE: 温暖、实用，像厨房墙上的点菜板
+   IDEA: 饭馆点菜单 + 菜谱卡
+   PICTURE: 每道菜一张插图或自家照片做封面
+   COLOUR and TYPE: 暖白底、酱油棕字、辣椒红强调；系统中文字体，做菜时大字
+   LAYOUT: 顶栏 → 分类 → 卡片；底部四个页签：菜谱 / 今日菜单 / 买菜 / 日记 */
+:root{--bg:#fbf6ee;--card:#fff;--ink:#3a2a1e;--dim:#8a7462;--red:#c8402b;--line:#eadfce;--green:#3f7d4e;--soft:#f6ede0}
+@media(prefers-color-scheme:dark){:root:not([data-theme=light]){--bg:#1d1714;--card:#2a221d;--ink:#f3e9dc;--dim:#b09a86;--line:#3d322a;--soft:#33291f}}
+:root[data-theme=dark]{--bg:#1d1714;--card:#2a221d;--ink:#f3e9dc;--dim:#b09a86;--line:#3d322a;--soft:#33291f}
 *{box-sizing:border-box;min-width:0}
-body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.6 -apple-system,"PingFang SC","Noto Sans SC",sans-serif;overflow-x:clip;padding-bottom:env(safe-area-inset-bottom)}
-header{background:var(--red);color:#fff;padding:calc(env(safe-area-inset-top) + 14px) 16px 14px;position:sticky;top:0;z-index:5;display:flex;align-items:center;gap:10px}
-header h1{font-size:22px;margin:0;flex:1}
+body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.6 -apple-system,"PingFang SC","Noto Sans SC",sans-serif;overflow-x:clip}
+header{background:var(--red);color:#fff;padding:calc(env(safe-area-inset-top) + 12px) 16px 12px;position:sticky;top:0;z-index:5;display:flex;align-items:center;gap:10px}
+header h1{font-size:21px;margin:0;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 header button{background:#ffffff26;color:#fff;border:0}
-.wrap{max-width:760px;margin:0 auto;padding:0 14px 170px}
+.wrap{max-width:760px;margin:0 auto;padding:0 14px calc(170px + env(safe-area-inset-bottom))}
 button{font:inherit;color:var(--ink);background:var(--card);border:1px solid var(--line);border-radius:12px;min-height:44px;padding:0 14px;cursor:pointer}
 button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible{outline:2px solid var(--red);outline-offset:2px}
 .pri{background:var(--red);border-color:var(--red);color:#fff;font-weight:600}
+.full{width:100%}
 input,textarea,select{font:inherit;font-size:16px;color:var(--ink);background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 12px;width:100%}
-textarea{min-height:110px;line-height:1.5}
-.search{margin:14px 0 8px}
-.chips{display:flex;gap:8px;overflow-x:auto;padding:4px 0 10px;scrollbar-width:none}
+textarea{min-height:100px;line-height:1.5}
+.search{margin:14px 0 6px}
+.chips{display:flex;gap:8px;overflow-x:auto;padding:4px 0 8px;scrollbar-width:none}
 .chips::-webkit-scrollbar{display:none}
 .chips button{flex:none;border-radius:999px;min-height:38px}
 .chips .act{background:var(--ink);color:var(--bg);border-color:var(--ink)}
-.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px 16px;margin:10px 0;display:flex;gap:14px;align-items:center;cursor:pointer}
-.card .em{width:52px;height:52px;border-radius:14px;background:var(--red);color:#fff;display:grid;place-items:center;font-size:22px;font-weight:700;flex:none}
-.card .t{flex:1}.card b{font-size:18px;display:block}
-.meta{color:var(--dim);font-size:14px}
-.fav{border:0;background:none;font-size:24px;color:var(--dim);min-width:44px;padding:0}
-.fav.y{color:#e0a419}
-.empty{color:var(--dim);text-align:center;padding:40px 10px}
-h2{font-size:26px;line-height:1.2;margin:18px 0 4px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(155px,1fr));gap:12px;margin-top:6px}
+.dish{background:var(--card);border:1px solid var(--line);border-radius:16px;overflow:hidden;cursor:pointer;display:flex;flex-direction:column}
+.cover{aspect-ratio:4/3;background:var(--soft) center/cover no-repeat;position:relative}
+.cover svg{position:absolute;inset:0;width:100%;height:100%}
+.dish .t{padding:8px 10px 10px;flex:1;display:flex;flex-direction:column;gap:6px}
+.dish b{font-size:17px;line-height:1.3}
+.meta{color:var(--dim);font-size:13px}
+.order{min-height:38px;font-size:15px;border-color:var(--red);color:var(--red);margin-top:auto}
+.order.on{background:var(--red);color:#fff}
+.empty{color:var(--dim);text-align:center;padding:36px 10px}
+.hero{border-radius:16px;overflow:hidden;margin-top:14px}
+h2{font-size:26px;line-height:1.2;margin:14px 0 4px}
 h3{font-size:19px;margin:22px 0 8px}
 .ing{list-style:none;padding:0;margin:0}
 .ing li{display:flex;gap:12px;align-items:center;padding:10px 4px;border-bottom:1px solid var(--line);cursor:pointer}
-.ing li span:last-child{margin-left:auto;color:var(--dim);white-space:nowrap}
+.ing li .amt{margin-left:auto;color:var(--dim);text-align:right;font-size:15px}
 .box{width:24px;height:24px;border:2px solid var(--dim);border-radius:7px;flex:none;display:grid;place-items:center;color:#fff;font-size:15px}
 .done .box{background:var(--green);border-color:var(--green)}
-.done span:nth-child(2){text-decoration:line-through;color:var(--dim)}
+.done .nm{text-decoration:line-through;color:var(--dim)}
 .steps{list-style:none;padding:0;margin:0;counter-reset:s}
 .steps li{position:relative;padding:12px 0 12px 46px;border-bottom:1px solid var(--line);font-size:18px}
 .steps li::before{counter-increment:s;content:counter(s);position:absolute;left:0;top:12px;width:32px;height:32px;border-radius:50%;background:var(--red);color:#fff;display:grid;place-items:center;font-size:16px;font-weight:700}
-.steps li.cur{background:#c8402b14}
 .tbtn{margin-top:8px;min-height:38px;font-size:15px;color:var(--red);border-color:var(--red)}
 .row{display:flex;gap:10px;flex-wrap:wrap;margin:12px 0}
-.timer{position:fixed;left:12px;right:12px;bottom:calc(68px + env(safe-area-inset-bottom));max-width:520px;margin:0 auto;background:var(--ink);color:var(--bg);border-radius:18px;padding:12px 16px;display:flex;align-items:center;gap:12px;z-index:9;box-shadow:0 8px 30px #0005}
-.timer .big{font-size:32px;font-weight:700;font-variant-numeric:tabular-nums}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px 16px;margin:14px 0}
+.panel h3{margin-top:0}
+.mi{display:flex;gap:12px;align-items:center;padding:8px 0;border-bottom:1px solid var(--line)}
+.mi:last-child{border-bottom:0}
+.mi .th{width:56px;height:42px;border-radius:8px;background:var(--soft) center/cover;flex:none;position:relative;overflow:hidden}
+.mi .th svg{position:absolute;inset:0;width:100%;height:100%}
+.mi .t{flex:1;cursor:pointer}
+.mi .x{border:0;background:none;color:var(--dim);font-size:22px;min-width:44px;padding:0}
+.seg{display:flex;gap:6px;flex-wrap:wrap}.seg button{flex:1;min-width:64px}.seg .act{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.seas{font-size:15px;color:var(--dim);line-height:1.8}
+.big{font-size:24px;line-height:1.5;margin:18px 0 6px}
+.prog{height:8px;background:var(--line);border-radius:4px;overflow:hidden;margin:14px 0 6px}
+.prog i{display:block;height:100%;background:var(--red);transition:width .3s}
+.timer[hidden]{display:none}
+.timer{position:fixed;left:12px;right:12px;bottom:calc(70px + env(safe-area-inset-bottom));max-width:520px;margin:0 auto;background:var(--ink);color:var(--bg);border-radius:18px;padding:12px 16px;display:flex;align-items:center;gap:12px;z-index:9;box-shadow:0 8px 30px #0005}
+.timer .tn{font-size:30px;font-weight:700;font-variant-numeric:tabular-nums}
 .timer .lbl{flex:1;font-size:14px;overflow-wrap:anywhere}
 .timer button{background:transparent;color:var(--bg);border-color:#ffffff55}
 .timer.ring{background:var(--red);animation:pulse 1s infinite}
 @keyframes pulse{50%{transform:scale(1.03)}}
-@media(prefers-reduced-motion:reduce){.timer.ring{animation:none}}
+@media(prefers-reduced-motion:reduce){.timer.ring{animation:none}.prog i{transition:none}}
 nav{position:fixed;left:0;right:0;bottom:0;background:var(--card);border-top:1px solid var(--line);display:flex;padding-bottom:env(safe-area-inset-bottom);z-index:6}
-nav button{flex:1;border:0;border-radius:0;background:none;min-height:56px;font-size:15px;color:var(--dim)}
+nav button{flex:1;border:0;border-radius:0;background:none;min-height:58px;font-size:15px;color:var(--dim);position:relative}
 nav .act{color:var(--red);font-weight:700}
-.note{font-size:13px;color:var(--dim);margin:14px 0}
+nav .badge{position:absolute;top:6px;left:calc(50% + 22px);background:var(--red);color:#fff;font-size:12px;border-radius:999px;min-width:20px;height:20px;line-height:20px;padding:0 5px}
+.note{font-size:13px;color:var(--dim);margin:10px 0}
+.banner{background:var(--green);color:#fff;border-radius:12px;padding:10px 14px;margin:12px 0}
 label.f{display:block;margin:14px 0 6px;font-weight:600}
-.shop li{cursor:pointer}
+.diary{background:var(--card);border:1px solid var(--line);border-radius:16px;overflow:hidden;margin:14px 0}
+.diary img{width:100%;display:block;max-height:60vh;object-fit:cover}
+.diary .t{padding:12px 14px}
+.preview{width:100%;border-radius:12px;margin-top:10px;display:block}
+.filebtn{position:relative;overflow:hidden;display:inline-flex;align-items:center;justify-content:center}
+.filebtn input{position:absolute;inset:0;opacity:0;font-size:0;cursor:pointer}
 </style>
 </head>
 <body>
-<header><h1 id="ttl">家常菜谱</h1><button id="back" hidden>‹ 返回</button></header>
+<header><button id="back" hidden>‹ 返回</button><h1 id="ttl">家常菜谱</h1></header>
 <div class="wrap" id="app"></div>
-<div class="timer" id="timer" hidden><div class="big" id="tnum">00:00</div><div class="lbl" id="tlbl"></div><button id="tstop">停止</button></div>
+<div class="timer" id="timer" hidden><div class="tn" id="tnum">00:00</div><div class="lbl" id="tlbl"></div><button id="tstop">停止</button></div>
 <nav id="nav">
   <button data-v="list" class="act">菜谱</button>
-  <button data-v="favs">收藏</button>
+  <button data-v="menu">今日菜单<span class="badge" id="badge" hidden></span></button>
   <button data-v="shop">买菜清单</button>
-  <button data-v="mine">我的菜</button>
+  <button data-v="diary">做饭日记</button>
 </nav>
 <script>
 {
@@ -93,113 +118,380 @@ const R=[
 {n:'麻婆豆腐',c:'素菜',t:20,i:[['嫩豆腐','1盒'],['牛肉末','100克'],['郫县豆瓣酱','1勺'],['花椒粉','适量'],['蒜','3瓣'],['淀粉','1勺'],['葱','1根']],s:['豆腐切小块，放加盐的开水里焯一下（2分钟）捞出','热油炒肉末到酥，下豆瓣酱和蒜末炒出红油','加一碗水烧开，轻轻放入豆腐，小火煮（5分钟）','淀粉水分两次勾芡，轻推不要翻','出锅撒花椒粉和葱花']},
 {n:'青椒土豆丝',c:'素菜',t:15,i:[['土豆','2个'],['青椒','1个'],['干辣椒','3个'],['醋','1勺'],['盐','适量'],['蒜','2瓣']],s:['土豆切细丝，清水泡洗两遍去淀粉，沥干','青椒切丝，蒜切片','热油下蒜片、干辣椒炒香','下土豆丝大火快炒（2分钟），沿锅边淋醋','放青椒丝、盐，翻炒半分钟出锅']},
 {n:'蒜蓉西兰花',c:'素菜',t:10,i:[['西兰花','1颗'],['蒜','5瓣'],['盐','适量'],['蚝油','1勺']],s:['西兰花掰小朵，淡盐水泡（10分钟）洗净','开水加几滴油和盐，西兰花焯（1分钟）捞出','热油炒香蒜末，下西兰花大火翻炒','加盐、蚝油翻匀出锅']},
-{n:'清蒸鱼',c:'荤菜',t:25,i:[['鲈鱼','1条'],['葱','3根'],['姜','1块'],['蒸鱼豉油','3勺'],['料酒','1勺']],s:['鱼处理干净，两面划刀，抹料酒，肚子和刀口塞姜片葱段','水开后上锅大火蒸（8分钟），关火再焖（2分钟）','倒掉盘里的水，拿掉旧葱姜，铺上新葱丝姜丝','淋蒸鱼豉油，烧一勺滚油浇上去']},
+{n:'清蒸鱼',c:'鱼虾',t:25,i:[['鲈鱼','1条'],['葱','3根'],['姜','1块'],['蒸鱼豉油','3勺'],['料酒','1勺']],s:['鱼处理干净，两面划刀，抹料酒，肚子和刀口塞姜片葱段','水开后上锅大火蒸（8分钟），关火再焖（2分钟）','倒掉盘里的水，拿掉旧葱姜，铺上新葱丝姜丝','淋蒸鱼豉油，烧一勺滚油浇上去']},
 {n:'糖醋排骨',c:'荤菜',t:50,i:[['小排','500克'],['冰糖','20克'],['醋','4勺'],['生抽','2勺'],['料酒','2勺'],['姜','3片'],['白芝麻','少许']],s:['排骨冷水下锅加料酒焯水（5分钟），捞出洗净','锅里少许油，排骨煎到微黄','加姜片、料酒、生抽、2勺醋，倒热水没过排骨','加冰糖，大火烧开转小火炖（30分钟）','大火收汁，再加2勺醋翻匀，撒芝麻']},
-{n:'紫菜蛋花汤',c:'汤',t:8,i:[['紫菜','一小块'],['鸡蛋','1个'],['虾皮','一小把'],['葱','1根'],['香油','几滴'],['盐','适量']],s:['紫菜撕小块，和虾皮一起放汤碗里','鸡蛋打散','水烧开，转小火慢慢淋入蛋液，等几秒再推开','加盐，冲进汤碗，撒葱花、滴香油']},
+{n:'紫菜蛋花汤',c:'汤羹',t:8,i:[['紫菜','一小块'],['鸡蛋','1个'],['虾皮','一小把'],['葱','1根'],['香油','几滴'],['盐','适量']],s:['紫菜撕小块，和虾皮一起放汤碗里','鸡蛋打散','水烧开，转小火慢慢淋入蛋液，等几秒再推开','加盐，冲进汤碗，撒葱花、滴香油']},
 {n:'西红柿牛腩',c:'荤菜',t:100,i:[['牛腩','500克'],['西红柿','3个'],['洋葱','半个'],['番茄酱','2勺'],['姜','3片'],['料酒','2勺'],['盐','适量']],s:['牛腩切块，冷水下锅加料酒焯水（5分钟），捞出洗净','西红柿去皮切块，洋葱切块','油炒洋葱和一半西红柿出汁，加番茄酱','放牛腩、姜，加热水没过，大火烧开转小火炖（80分钟）','放剩下的西红柿再煮（10分钟），加盐调味']},
 {n:'蛋炒饭',c:'主食',t:10,i:[['剩米饭','1碗'],['鸡蛋','2个'],['葱','2根'],['火腿或青豆','适量'],['盐','适量'],['生抽','半勺']],s:['米饭用手抓散，鸡蛋打散，葱切花','热油下蛋液炒散盛出','下火腿或青豆炒一下，倒米饭大火炒到粒粒分开','倒回鸡蛋，加盐、生抽翻匀，撒葱花']},
 {n:'葱油拌面',c:'主食',t:20,i:[['面条','1人份'],['小葱','8根'],['生抽','3勺'],['老抽','1勺'],['糖','1勺']],s:['小葱切段，葱白葱绿分开','冷油下葱白小火慢炸，再下葱绿，炸到焦黄（8分钟）','加生抽、老抽、糖，小火煮到冒小泡，关火','面条煮熟捞出，加两勺葱油拌匀']},
 {n:'凉拌黄瓜',c:'凉菜',t:10,i:[['黄瓜','2根'],['蒜','4瓣'],['醋','2勺'],['生抽','1勺'],['糖','半勺'],['香油','几滴'],['辣椒油','适量']],s:['黄瓜拍碎切段，加少许盐腌（5分钟），倒掉出的水','蒜切末','加蒜末、醋、生抽、糖、香油、辣椒油拌匀']},
 {n:'地三鲜',c:'素菜',t:25,i:[['茄子','1根'],['土豆','1个'],['青椒','1个'],['生抽','2勺'],['糖','1勺'],['淀粉','1勺'],['蒜','3瓣']],s:['茄子、土豆切滚刀块，青椒切块','调汁：生抽2、糖1、淀粉1、水3勺','土豆煎到金黄熟透盛出，茄子裹薄薄一层淀粉煎软盛出','炒香蒜末，倒回土豆、茄子和青椒','倒料汁大火翻匀出锅']},
 {n:'回锅肉',c:'荤菜',t:40,i:[['带皮五花肉','300克'],['蒜苗','3根'],['郫县豆瓣酱','1勺'],['甜面酱','半勺'],['姜','3片'],['料酒','1勺']],s:['五花肉整块冷水下锅，加姜和料酒煮（20分钟），筷子能扎透','晾凉切薄片，蒜苗切段','少许油把肉片煸到微卷出油','下豆瓣酱、甜面酱炒出红油','放蒜苗翻炒到断生出锅']},
-{n:'白灼虾',c:'荤菜',t:10,i:[['鲜虾','500克'],['姜','4片'],['葱','2根'],['料酒','1勺'],['生抽','2勺'],['蒜','3瓣']],s:['虾洗净，剪掉虾须','水里放姜片、葱段、料酒烧开','下虾煮到变红弯曲（2分钟）立刻捞出','蘸汁：蒜末加生抽，淋一勺热油']},
-{n:'冬瓜排骨汤',c:'汤',t:70,i:[['排骨','400克'],['冬瓜','500克'],['姜','4片'],['葱','1根'],['盐','适量']],s:['排骨冷水下锅焯水（5分钟），捞出洗净','排骨、姜片放锅里，加足量水，大火烧开转小火炖（45分钟）','冬瓜去皮切块放进去再煮（15分钟）','加盐调味，撒葱花']},
-{n:'清炒小青菜',c:'素菜',t:5,i:[['小青菜','一把'],['蒜','3瓣'],['盐','适量']],s:['青菜洗净沥干，蒜拍碎','锅烧热多放点油，炒香蒜','下青菜大火快炒（1分钟）到变软','加盐翻匀马上出锅']}
-];
-const CATS=['全部','荤菜','素菜','汤','主食','凉菜'];
+{n:'白灼虾',c:'鱼虾',t:10,i:[['鲜虾','500克'],['姜','4片'],['葱','2根'],['料酒','1勺'],['生抽','2勺'],['蒜','3瓣']],s:['虾洗净，剪掉虾须','水里放姜片、葱段、料酒烧开','下虾煮到变红弯曲（2分钟）立刻捞出','蘸汁：蒜末加生抽，淋一勺热油']},
+{n:'冬瓜排骨汤',c:'汤羹',t:70,i:[['排骨','400克'],['冬瓜','500克'],['姜','4片'],['葱','1根'],['盐','适量']],s:['排骨冷水下锅焯水（5分钟），捞出洗净','排骨、姜片放锅里，加足量水，大火烧开转小火炖（45分钟）','冬瓜去皮切块放进去再煮（15分钟）','加盐调味，撒葱花']},
+{n:'清炒小青菜',c:'素菜',t:5,i:[['小青菜','一把'],['蒜','3瓣'],['盐','适量']],s:['青菜洗净沥干，蒜拍碎','锅烧热多放点油，炒香蒜','下青菜大火快炒（1分钟）到变软','加盐翻匀马上出锅']},
+{n:'辣椒炒肉',c:'荤菜',t:15,i:[['五花肉或前腿肉','250克'],['青椒或螺丝椒','4个'],['蒜','4瓣'],['豆豉','1小勺'],['生抽','1勺'],['老抽','半勺'],['盐','适量']],s:['肉切薄片，辣椒斜切段，蒜切片','辣椒不放油干煸到起虎皮，加少许盐盛出','少许油下肉片煸到出油微焦','加蒜片、豆豉炒香，放生抽、老抽上色','倒回辣椒大火翻炒均匀出锅']},
+{n:'土豆烧牛肉',c:'荤菜',t:90,i:[['牛腩','500克'],['土豆','2个'],['胡萝卜','1根'],['姜','4片'],['八角','2个'],['生抽','2勺'],['老抽','1勺'],['料酒','2勺'],['冰糖','5颗']],s:['牛腩切块，冷水下锅加料酒焯水（5分钟），捞出洗净','少许油炒香姜片、八角，下牛腩翻炒','加生抽、老抽、冰糖炒匀上色，加热水没过牛肉','大火烧开转小火炖（60分钟）','放土豆、胡萝卜块再炖（20分钟），大火收汁']},
+{n:'京酱肉丝',c:'荤菜',t:20,i:[['猪里脊','300克'],['甜面酱','2勺'],['大葱','2根'],['豆腐皮','2张'],['糖','1勺'],['淀粉','1勺'],['料酒','1勺']],s:['肉切丝，加料酒、淀粉、少许油抓匀腌（10分钟）','大葱葱白切细丝铺盘底，豆腐皮切方块蒸一下','热油滑炒肉丝变白盛出','少许油小火炒甜面酱加糖和一点水，炒到冒泡','倒回肉丝裹满酱汁，盛在葱丝上，用豆腐皮卷着吃']},
+{n:'水煮肉片',c:'荤菜',t:25,i:[['猪里脊','300克'],['豆芽或生菜','一把'],['郫县豆瓣酱','2勺'],['干辣椒','10个'],['花椒','一小把'],['蒜','5瓣'],['淀粉','1勺'],['蛋清','1个']],s:['肉切薄片，加盐、蛋清、淀粉抓匀腌（10分钟）','豆芽焯熟铺碗底','油炒豆瓣酱和蒜末出红油，加一碗半水烧开','肉片一片片下锅，变色就关火，连汤倒在豆芽上','面上放蒜末、干辣椒段、花椒，浇一勺滚油']},
+{n:'青椒肉丝',c:'荤菜',t:15,i:[['猪里脊','200克'],['青椒','3个'],['生抽','1勺'],['淀粉','1勺'],['料酒','1勺'],['盐','适量'],['蒜','2瓣']],s:['肉切丝，加料酒、生抽、淀粉抓匀腌（10分钟）','青椒切丝，蒜切末','热油滑炒肉丝变色盛出','炒香蒜末，下青椒丝大火炒到断生','倒回肉丝，加盐翻匀出锅']},
+{n:'黄焖鸡',c:'荤菜',t:40,i:[['鸡腿','3个'],['干香菇','6朵'],['青椒','1个'],['土豆','1个'],['姜','4片'],['冰糖','5颗'],['生抽','2勺'],['老抽','1勺'],['蚝油','1勺']],s:['鸡腿剁块，香菇泡发，土豆切块','少许油小火炒化冰糖，下鸡块翻炒上色','加姜片、香菇翻炒，放生抽、老抽、蚝油','加热水没过鸡块，放土豆，小火焖（25分钟）','放青椒块，大火收汁到浓稠']},
+{n:'三杯鸡',c:'荤菜',t:30,i:[['鸡腿','3个'],['九层塔或罗勒','一把'],['姜','一块'],['蒜','10瓣'],['米酒','1小碗'],['生抽','3勺'],['麻油','3勺'],['冰糖','5颗']],s:['鸡腿剁块，姜切片，蒜去皮整颗','麻油小火煸香姜片和蒜，下鸡块煎到表面金黄','加冰糖、生抽、米酒，大火烧开','转小火焖（15分钟），中途翻一下','大火收汁，关火前放九层塔翻匀']},
+{n:'孜然羊肉',c:'荤菜',t:20,i:[['羊腿肉','300克'],['洋葱','半个'],['香菜','2根'],['孜然粒','1勺'],['辣椒面','1小勺'],['生抽','1勺'],['淀粉','1勺']],s:['羊肉切薄片，加生抽、淀粉、少许油抓匀腌（10分钟）','洋葱切丝，香菜切段','热油大火炒羊肉片到变色','加洋葱丝翻炒，撒孜然、辣椒面、盐','放香菜段翻匀出锅']},
+{n:'蚝油牛肉',c:'荤菜',t:20,i:[['牛里脊','250克'],['蚝油','2勺'],['生抽','1勺'],['淀粉','1勺'],['姜','3片'],['葱','2根'],['小苏打','一小撮']],s:['牛肉逆纹切片，加生抽、小苏打、淀粉、一点水抓匀腌（15分钟）','腌好后加一勺油拌匀防粘','热锅多放油，牛肉滑炒到八成熟盛出','炒香姜葱，加蚝油和少许水煮开','倒回牛肉快速翻匀出锅']},
+{n:'糖醋里脊',c:'荤菜',t:30,i:[['猪里脊','300克'],['鸡蛋','1个'],['淀粉','4勺'],['番茄酱','3勺'],['白醋','2勺'],['糖','3勺'],['白芝麻','少许']],s:['里脊切条，加盐、料酒腌（10分钟）','加蛋液和淀粉抓匀挂糊','油六成热下肉条炸到定型捞出，油再烧热复炸（1分钟）到金黄','另起锅，番茄酱、糖、白醋加少许水小火熬稠','倒入肉条快速裹匀，撒芝麻']},
+{n:'木须肉',c:'荤菜',t:20,i:[['猪里脊','150克'],['鸡蛋','3个'],['木耳','一把'],['黄瓜','1根'],['生抽','1勺'],['淀粉','1勺'],['葱姜','适量']],s:['肉切片加淀粉、生抽腌（10分钟），木耳泡发，黄瓜切片','鸡蛋炒散盛出','热油炒肉片变色，加葱姜','放木耳、黄瓜翻炒','倒回鸡蛋，加盐、生抽翻匀出锅']},
+{n:'香菇滑鸡',c:'荤菜',t:35,i:[['鸡腿','2个'],['干香菇','8朵'],['生抽','2勺'],['蚝油','1勺'],['淀粉','1勺'],['姜','4片'],['葱','2根']],s:['鸡腿去骨切块，加生抽、蚝油、淀粉、姜丝腌（15分钟）','香菇泡发切片，和鸡块拌在一起铺盘里','水开后上锅大火蒸（15分钟）','出锅撒葱花，淋一勺热油']},
+{n:'咖喱鸡',c:'荤菜',t:40,i:[['鸡腿或鸡胸','400克'],['咖喱块','3块'],['土豆','2个'],['胡萝卜','1根'],['洋葱','1个']],s:['鸡肉、土豆、胡萝卜、洋葱都切块','少许油炒香洋葱，下鸡块炒变色','放土豆、胡萝卜翻炒，加水没过食材','大火烧开转小火煮（20分钟）','关火放咖喱块搅匀化开，再开小火煮到浓稠（5分钟）']},
+{n:'蒜苔炒肉',c:'荤菜',t:15,i:[['猪肉','200克'],['蒜苔','一把'],['生抽','1勺'],['淀粉','1勺'],['盐','适量'],['干辣椒','3个']],s:['肉切丝加生抽、淀粉腌（10分钟），蒜苔切段','热油炒肉丝变色盛出','下蒜苔和干辣椒炒（3分钟）到变软','倒回肉丝，加盐翻匀出锅']},
+{n:'干煸四季豆',c:'素菜',t:20,i:[['四季豆','400克'],['猪肉末','50克'],['干辣椒','6个'],['花椒','一小撮'],['蒜','4瓣'],['生抽','1勺'],['盐','适量']],s:['四季豆掰段洗净一定要擦干','少许油中小火把四季豆煸到表皮起皱、发软（8分钟），一定要熟透，盛出','炒香肉末，加蒜末、干辣椒、花椒','倒回四季豆，加生抽、盐翻炒均匀出锅']},
+{n:'鱼香茄子',c:'素菜',t:20,i:[['长茄子','2根'],['郫县豆瓣酱','1勺'],['醋','2勺'],['糖','2勺'],['生抽','1勺'],['淀粉','1勺'],['蒜姜葱','适量']],s:['茄子切条，撒少许盐腌（10分钟），挤干水分','调鱼香汁：醋2、糖2、生抽1、淀粉1、水3勺','茄子少许油煎软盛出','炒香豆瓣酱、蒜姜，倒回茄子','淋鱼香汁大火翻匀，撒葱花']},
+{n:'手撕包菜',c:'素菜',t:10,i:[['包菜','半个'],['干辣椒','5个'],['蒜','4瓣'],['醋','1勺'],['生抽','1勺'],['盐','适量']],s:['包菜用手撕成小块，洗净沥干','热油炒香蒜片、干辣椒','下包菜大火快炒（2分钟）到稍软','沿锅边淋醋，加生抽、盐翻匀出锅']},
+{n:'家常豆腐',c:'素菜',t:20,i:[['老豆腐','1块'],['五花肉','50克'],['青椒','1个'],['木耳','一小把'],['郫县豆瓣酱','1勺'],['生抽','1勺'],['淀粉','1勺']],s:['豆腐切三角片，两面煎到金黄盛出','少许油煸五花肉片出油，加豆瓣酱炒出红油','放木耳、青椒和豆腐，加生抽和半碗水','小火烧（3分钟）入味','淀粉水勾芡出锅']},
+{n:'蚝油生菜',c:'素菜',t:8,i:[['生菜','1颗'],['蚝油','2勺'],['生抽','1勺'],['糖','半勺'],['蒜','4瓣'],['淀粉','半勺']],s:['生菜掰开洗净','开水加几滴油和盐，生菜烫（半分钟）捞出摆盘','炒香蒜末，加蚝油、生抽、糖和小半碗水','淀粉水勾薄芡，浇在生菜上']},
+{n:'干锅花菜',c:'素菜',t:15,i:[['有机花菜','1颗'],['五花肉','100克'],['干辣椒','5个'],['蒜','4瓣'],['生抽','1勺'],['蚝油','1勺']],s:['花菜掰小朵，淡盐水泡（10分钟）洗净沥干','五花肉切片，小火煸出油到微焦','加蒜片、干辣椒炒香','下花菜大火翻炒（4分钟）到微焦','加生抽、蚝油翻匀出锅']},
+{n:'韭菜炒鸡蛋',c:'素菜',t:8,i:[['韭菜','一把'],['鸡蛋','3个'],['盐','适量']],s:['韭菜切段，鸡蛋加少许盐打散','热油炒鸡蛋到凝固盛出','下韭菜大火炒（1分钟）','倒回鸡蛋，加盐翻匀出锅']},
+{n:'虎皮青椒',c:'素菜',t:15,i:[['青椒或尖椒','6个'],['蒜','4瓣'],['生抽','2勺'],['醋','1勺'],['糖','1勺']],s:['青椒去蒂，用刀拍一下','不放油干煎，用锅铲压着煎到两面起虎皮','加少许油和蒜末炒香','加生抽、醋、糖翻炒入味出锅']},
+{n:'山药炒木耳',c:'素菜',t:12,i:[['铁棍山药或菜山药','1根'],['木耳','一把'],['胡萝卜','半根'],['葱','1根'],['盐','适量'],['蚝油','1勺']],s:['山药去皮切片泡水（戴手套防痒），木耳泡发','山药和木耳一起焯水（1分钟）捞出','炒香葱花，下胡萝卜片炒软','放山药、木耳，加盐、蚝油翻炒均匀']},
+{n:'醋溜白菜',c:'素菜',t:10,i:[['大白菜','半颗'],['醋','2勺'],['糖','1勺'],['生抽','1勺'],['淀粉','1勺'],['干辣椒','3个']],s:['白菜帮斜切片，菜叶撕块','调汁：醋2、糖1、生抽1、淀粉1、水2勺','热油炒香干辣椒，先下白菜帮炒软','再下菜叶炒匀，倒料汁大火翻匀出锅']},
+{n:'红烧带鱼',c:'鱼虾',t:30,i:[['带鱼','500克'],['姜','4片'],['葱','2根'],['蒜','4瓣'],['生抽','2勺'],['老抽','半勺'],['醋','1勺'],['糖','1勺'],['料酒','1勺']],s:['带鱼切段洗净擦干，抹少许盐腌（10分钟）','锅里多放油，带鱼煎到两面金黄','加姜、葱、蒜炒香，沿锅边淋料酒和醋','加生抽、老抽、糖和半碗水，小火烧（8分钟）','大火收汁出锅']},
+{n:'油焖大虾',c:'鱼虾',t:15,i:[['大虾','500克'],['姜','3片'],['葱','2根'],['番茄酱','1勺'],['糖','1勺'],['生抽','1勺'],['料酒','1勺']],s:['虾剪去虾须虾枪，挑出虾线','多放油，下姜葱炒香，放虾煎到两面变红，压出虾油','加料酒、番茄酱、糖、生抽和少许水','小火焖（3分钟），大火收汁出锅']},
+{n:'蒜蓉粉丝蒸虾',c:'鱼虾',t:20,i:[['大虾','12只'],['粉丝','1把'],['蒜','1头'],['生抽','2勺'],['蚝油','1勺'],['葱','1根']],s:['粉丝温水泡软铺盘底，虾开背去虾线摆上','蒜末一半用热油炸成金蒜，和生蒜混合，加生抽、蚝油拌匀','蒜蓉铺在虾背上','水开上锅蒸（6分钟），撒葱花淋热油']},
+{n:'酸菜鱼',c:'鱼虾',t:35,i:[['黑鱼或草鱼','1条'],['酸菜','1袋'],['干辣椒','8个'],['花椒','一把'],['姜','4片'],['蒜','4瓣'],['蛋清','1个'],['淀粉','1勺']],s:['鱼片成片，加盐、蛋清、淀粉抓匀腌（10分钟），鱼骨切段','少许油炒香姜蒜，下酸菜炒（2分钟）','放鱼骨和热水，大火煮（8分钟）到汤发白，鱼骨和酸菜捞到碗底','汤里一片片下鱼片，变白就连汤倒进碗','面上放干辣椒、花椒，浇一勺滚油']},
+{n:'辣炒花甲',c:'鱼虾',t:20,i:[['花甲','500克'],['干辣椒','5个'],['姜','3片'],['蒜','4瓣'],['郫县豆瓣酱','1勺'],['料酒','1勺'],['葱','1根']],s:['花甲放淡盐水加几滴油吐沙（60分钟），洗净','开水焯到刚开口（1分钟）捞出','油炒香姜蒜、干辣椒和豆瓣酱','倒入花甲，加料酒大火翻炒（1分钟），撒葱花']},
+{n:'西红柿鸡蛋汤',c:'汤羹',t:10,i:[['西红柿','2个'],['鸡蛋','2个'],['葱','1根'],['盐','适量'],['香油','几滴']],s:['西红柿切小块，鸡蛋打散','少许油炒西红柿出汁','加两碗水烧开，煮（3分钟）','转小火淋入蛋液，等几秒再推开','加盐，撒葱花、滴香油']},
+{n:'玉米排骨汤',c:'汤羹',t:75,i:[['排骨','400克'],['玉米','1根'],['胡萝卜','1根'],['姜','4片'],['盐','适量']],s:['排骨冷水下锅焯水（5分钟），捞出洗净','玉米、胡萝卜切段','排骨、姜片加足量水，大火烧开转小火炖（40分钟）','放玉米、胡萝卜再炖（20分钟）','加盐调味']},
+{n:'酸辣汤',c:'汤羹',t:15,i:[['嫩豆腐','半盒'],['木耳','一小把'],['鸡蛋','1个'],['香醋','3勺'],['白胡椒粉','1小勺'],['生抽','1勺'],['淀粉','2勺'],['香菜','2根']],s:['豆腐、泡发的木耳切丝','水烧开放豆腐和木耳，加生抽、盐煮（2分钟）','淀粉水分两次勾芡，汤变浓稠','淋入蛋液成蛋花','关火加醋、胡椒粉，撒香菜']},
+{n:'丝瓜蛋汤',c:'汤羹',t:10,i:[['丝瓜','1根'],['鸡蛋','2个'],['姜','2片'],['盐','适量']],s:['丝瓜去皮切滚刀块，鸡蛋打散','少许油把蛋液煎成蛋饼，用铲子划碎','放丝瓜和姜片翻炒，加两碗开水','煮（3分钟）到丝瓜变软，加盐']},
+{n:'鲫鱼豆腐汤',c:'汤羹',t:30,i:[['鲫鱼','1条'],['嫩豆腐','1盒'],['姜','4片'],['葱','2根'],['料酒','1勺'],['盐','适量'],['白胡椒粉','少许']],s:['鲫鱼处理干净擦干，豆腐切块','热锅多放油，鲫鱼煎到两面金黄','加姜片、料酒，倒入一大碗开水（一定要开水，汤才白）','大火煮（10分钟）到汤奶白，放豆腐再煮（5分钟）','加盐、胡椒粉，撒葱花']},
+{n:'西红柿鸡蛋面',c:'主食',t:15,i:[['面条','2人份'],['西红柿','2个'],['鸡蛋','2个'],['葱','1根'],['盐','适量'],['生抽','1勺']],s:['西红柿切块，鸡蛋打散','鸡蛋炒散盛出','炒西红柿出汁，加两碗水烧开，加盐和生抽','另锅煮好面条，捞进碗里','浇上西红柿汤，放鸡蛋，撒葱花']},
+{n:'炸酱面',c:'主食',t:30,i:[['面条','2人份'],['五花肉丁','200克'],['黄豆酱','2勺'],['甜面酱','1勺'],['黄瓜','1根'],['葱姜','适量']],s:['两种酱加小半碗水调开','少许油小火煸肉丁出油，加葱姜','倒入酱汁小火慢熬（10分钟），经常搅防糊','黄瓜切丝，面条煮好过凉水','面上放炸酱和黄瓜丝拌匀']},
+{n:'干炒牛河',c:'主食',t:20,i:[['河粉','400克'],['牛肉','150克'],['豆芽','一把'],['韭黄或葱','一把'],['生抽','2勺'],['老抽','1勺'],['淀粉','1勺']],s:['牛肉切片，加生抽、淀粉、少许油腌（10分钟）','河粉抖散','热油滑炒牛肉到变色盛出','下河粉大火翻炒，加生抽、老抽炒匀上色','放豆芽、韭黄和牛肉，快速翻匀出锅']},
+{n:'腊肠煲仔饭',c:'主食',t:45,i:[['大米','2杯'],['广式腊肠','2根'],['青菜','几棵'],['鸡蛋','1个'],['生抽','2勺'],['老抽','半勺'],['糖','1小勺']],s:['大米洗净，按平时煮饭的水量放进电饭锅','腊肠斜切片铺在米上，按下煮饭键（30分钟）','调汁：生抽、老抽、糖、少许热水和几滴油','饭快好时打一个鸡蛋上去，焖（5分钟）','青菜焯熟摆上，淋汁拌匀']},
+{n:'鸡蛋饼',c:'主食',t:15,i:[['面粉','100克'],['鸡蛋','2个'],['葱','2根'],['清水','200毫升'],['盐','适量']],s:['面粉、鸡蛋、水、盐搅成能流动的面糊，加葱花','平底锅抹薄油，小火','倒一勺面糊转锅摊开，煎到边缘翘起（1分钟）','翻面再煎（1分钟），卷起切块']},
+{n:'凉拌木耳',c:'凉菜',t:15,i:[['干木耳','一把'],['蒜','4瓣'],['小米辣','2个'],['香菜','2根'],['醋','2勺'],['生抽','2勺'],['糖','半勺'],['香油','几滴']],s:['木耳冷水泡发（泡发不要超过一夜）洗净','开水煮（3分钟）捞出过凉水','蒜末、小米辣圈放碗里，浇热油','加醋、生抽、糖、香油，和木耳、香菜拌匀']},
+{n:'皮蛋豆腐',c:'凉菜',t:8,i:[['内酯豆腐','1盒'],['皮蛋','2个'],['葱','1根'],['生抽','2勺'],['醋','1勺'],['香油','几滴'],['辣椒油','适量']],s:['豆腐倒扣在盘里，切块','皮蛋剥壳切小块，放在豆腐上','生抽、醋、香油、辣椒油调汁，淋上去','撒葱花']},
+{n:'口水鸡',c:'凉菜',t:40,i:[['鸡腿','2个'],['姜','4片'],['葱','2根'],['料酒','1勺'],['花生碎','一把'],['蒜','4瓣'],['辣椒油','3勺'],['生抽','2勺'],['醋','1勺'],['糖','1勺'],['花椒粉','少许']],s:['鸡腿冷水下锅，加姜葱料酒，烧开后转小火煮（15分钟），关火焖（10分钟）','捞出放冰水里泡凉，皮更脆','调汁：蒜末、辣椒油、生抽、醋、糖、花椒粉，加两勺煮鸡的汤','鸡腿切块摆盘，淋汁，撒花生碎和葱花']},
+{n:'凉拌海带丝',c:'凉菜',t:10,i:[['海带丝','300克'],['蒜','4瓣'],['小米辣','2个'],['醋','2勺'],['生抽','1勺'],['糖','半勺'],['香油','几滴']],s:['海带丝洗净，开水焯（2分钟）捞出过凉水','蒜末、小米辣放碗里浇热油','加醋、生抽、糖、香油，和海带丝拌匀']}];
+const CATS=['全部','快手菜','收藏','荤菜','素菜','鱼虾','汤羹','主食','凉菜','我加的'];
+const SEAS=['盐','糖','生抽','老抽','料酒','醋','香醋','白醋','淀粉','香油','麻油','蚝油','冰糖','葱','大葱','小葱','姜','蒜','葱姜','蒜姜葱','花椒','花椒粉','八角','干辣椒','白胡椒粉','孜然粒','辣椒面','辣椒油','番茄酱','郫县豆瓣酱','甜面酱','黄豆酱','豆豉','蒸鱼豉油','白芝麻','小苏打','清水','米酒','咖喱块','小米辣','香菜'];
 const $=s=>document.querySelector(s);
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const store={get(k,d){try{return JSON.parse(localStorage.getItem(k))??d}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
-let mine=store.get('ck_mine',[]),favs=store.get('ck_favs',[]),shop=store.get('ck_shop',[]);
-let prev='list',view='list',cat='全部',q='',cur=null,checked={},tm=null,tLeft=0,wake=null;
+let mine=store.get('ck_mine',[]),favs=store.get('ck_favs',[]),shop=store.get('ck_shop',[]),menu=store.get('ck_menu',{items:[],x:1}),me=store.get('ck_me','');
+let people=store.get('ck_people',3),sug=null;
+const xOf=p=>Math.max(1,Math.round(p/2.5*2)/2);
+let view='list',prev='list',cat='全部',q='',cur=null,checked={},tm=null,wake=null,covers={},diary=[],banner='',ck=null,newPhoto='';
 const all=()=>[...mine.map(r=>({...r,mine:1})),...R];
 const byName=n=>all().find(r=>r.n===n);
 const mins=s=>{const m=s.match(/（(\d+)分钟）/);return m?+m[1]:0};
-const save=()=>{store.set('ck_mine',mine);store.set('ck_favs',favs);store.set('ck_shop',shop)};
+const save=()=>{menu.x=xOf(people);store.set('ck_people',people);store.set('ck_mine',mine);store.set('ck_favs',favs);store.set('ck_shop',shop);store.set('ck_menu',menu);store.set('ck_me',me);badge()};
+const inMenu=n=>menu.items.some(x=>x.n===n);
+const today=()=>{const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')};
 
-function setNav(v){view=v;prev=v;document.querySelectorAll('#nav button').forEach(b=>b.classList.toggle('act',b.dataset.v===v));$('#back').hidden=true;$('#ttl').textContent={list:'家常菜谱',favs:'我的收藏',shop:'买菜清单',mine:'我的菜'}[v];render()}
-function cardHtml(r){const f=favs.includes(r.n);return `<div class="card" data-n="${esc(r.n)}"><div class="em">${esc(r.n.slice(0,1))}</div><div class="t"><b>${esc(r.n)}</b><span class="meta">${esc(r.c)} · 约 ${r.t||'?'} 分钟 · ${r.i.length} 样食材${r.mine?' · 我加的':''}</span></div><button class="fav ${f?'y':''}" data-f="${esc(r.n)}" aria-label="收藏">${f?'★':'☆'}</button></div>`}
+/* ---------- 图片：分类插图 + 步骤图示 + 自己拍的封面 ---------- */
+const hue=s=>{let h=0;for(const c of s)h=(h*31+c.charCodeAt(0))%360;return h};
+const PLATE='<ellipse cx="80" cy="84" rx="64" ry="24" fill="#00000014"/><ellipse cx="80" cy="78" rx="64" ry="26" fill="#fffdf8" stroke="#e6dccb" stroke-width="2"/><ellipse cx="80" cy="76" rx="46" ry="17" fill="#f4ede1"/>';
+const ART={
+'荤菜':PLATE+'<g>'+[[56,66],[74,62],[92,66],[64,78],[84,77],[102,74]].map(([x,y],i)=>`<rect x="${x-9}" y="${y-8}" width="20" height="17" rx="5" fill="${i%2?'#8b3a17':'#a3481d'}"/><rect x="${x-6}" y="${y-6}" width="9" height="4" rx="2" fill="#d7864f"/>`).join('')+'</g><g stroke="#3f8f3a" stroke-width="3" stroke-linecap="round"><path d="M60 58l6-3M96 58l5 3M80 84l6-2"/></g>',
+'素菜':PLATE+[[62,70,-30,'#4f9a4a'],[82,64,10,'#6db55a'],[98,72,40,'#3d8a3c'],[74,80,-10,'#7cc06a'],[92,82,25,'#58a64f']].map(([x,y,r,c])=>`<ellipse cx="${x}" cy="${y}" rx="16" ry="8" fill="${c}" transform="rotate(${r} ${x} ${y})"/><path d="M${x-12} ${y}h24" stroke="#ffffff66" stroke-width="1.5" transform="rotate(${r} ${x} ${y})"/>`).join('')+'<circle cx="70" cy="66" r="3" fill="#f2efe4"/><circle cx="90" cy="76" r="3" fill="#f2efe4"/>',
+'鱼虾':PLATE+'<path d="M44 74c14-16 46-18 66-4l14-10-2 14 2 14-14-10c-20 14-52 12-66-4z" fill="#d9974e"/><path d="M50 74c12-10 36-12 54-3" stroke="#f4c17e" stroke-width="3" fill="none"/><circle cx="56" cy="71" r="3" fill="#3a2a1e"/><g stroke="#3f8f3a" stroke-width="3" stroke-linecap="round"><path d="M70 64l14-4M78 82l16-2"/></g><path d="M74 66l12-2" stroke="#ff6b4a" stroke-width="2.5" stroke-linecap="round"/>',
+'汤羹':'<ellipse cx="80" cy="96" rx="52" ry="10" fill="#00000014"/><path d="M28 60h104c0 26-22 40-52 40s-52-14-52-40z" fill="#fffdf8" stroke="#e6dccb" stroke-width="2"/><ellipse cx="80" cy="60" rx="52" ry="12" fill="#f0c25a"/><ellipse cx="80" cy="60" rx="52" ry="12" fill="none" stroke="#e6dccb" stroke-width="2"/><circle cx="66" cy="58" r="5" fill="#fff6dc"/><circle cx="92" cy="61" r="4" fill="#e85d3a"/><path d="M76 62l10-3" stroke="#3f8f3a" stroke-width="3" stroke-linecap="round"/><g stroke="#ffffffcc" stroke-width="3" fill="none" stroke-linecap="round"><path d="M64 40c-6-6 6-10 0-18M82 40c-6-6 6-10 0-18M100 40c-6-6 6-10 0-18"/></g>',
+'主食':'<ellipse cx="80" cy="96" rx="50" ry="10" fill="#00000014"/><path d="M30 58h100c0 26-22 40-50 40s-50-14-50-40z" fill="#fffdf8" stroke="#e6dccb" stroke-width="2"/><ellipse cx="80" cy="58" rx="50" ry="12" fill="#f3d58c"/><g stroke="#e9b94e" stroke-width="3" fill="none"><path d="M42 58c8-6 14 6 22 0s14 6 22 0 14 6 22 0"/><path d="M48 62c8-5 14 5 22 0s14 5 22 0 12 5 20 0"/></g><circle cx="66" cy="54" r="6" fill="#e85d3a"/><path d="M90 52l14-2" stroke="#3f8f3a" stroke-width="3" stroke-linecap="round"/><g stroke="#8b5a2b" stroke-width="4" stroke-linecap="round"><path d="M98 20l24 40M108 18l20 42"/></g>',
+'凉菜':PLATE+[[60,72],[76,66],[92,70],[70,82],[88,82],[104,76]].map(([x,y])=>`<circle cx="${x}" cy="${y}" r="9" fill="#3d8a3c"/><circle cx="${x}" cy="${y}" r="6" fill="#bfe3a5"/><circle cx="${x}" cy="${y}" r="1.6" fill="#7ab45f"/>`).join('')+'<circle cx="82" cy="76" r="2.5" fill="#e85d3a"/><circle cx="68" cy="64" r="2.5" fill="#e85d3a"/><circle cx="98" cy="84" r="2.5" fill="#fff"/>'
+};
+function art(r){const h=hue(r.n);return `<svg viewBox="0 0 160 120" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><rect width="160" height="120" fill="hsl(${h} 55% 88%)"/><circle cx="140" cy="18" r="34" fill="hsl(${(h+40)%360} 60% 80%)"/>${ART[r.c]||ART['荤菜']}</svg>`}
+function coverHtml(r,cls){const p=covers[r.n];return p?`<div class="${cls}" style="background-image:url('${p}')"></div>`:`<div class="${cls}">${art(r)}</div>`}
+const ACT=[
+ [/腌|泡发|泡水|吐沙|泡软|泡（/,'腌·泡','<rect x="22" y="30" width="56" height="30" rx="6" fill="#fff" stroke="#c9b9a2" stroke-width="2"/><path d="M26 38h48" stroke="#e8d9c2" stroke-width="10"/><circle cx="84" cy="22" r="10" fill="#fff" stroke="#c8402b" stroke-width="2"/><path d="M84 16v6l4 3" stroke="#c8402b" stroke-width="2" fill="none"/>'],
+ [/焯水|焯|烫|煮/,'煮·焯水','<path d="M20 34h60v18c0 8-6 12-14 12H34c-8 0-14-4-14-12z" fill="#9aa7b4"/><path d="M14 34h72" stroke="#7c8996" stroke-width="4" stroke-linecap="round"/><circle cx="40" cy="44" r="3" fill="#fff"/><circle cx="56" cy="40" r="4" fill="#fff"/><circle cx="62" cy="48" r="2.5" fill="#fff"/><path d="M34 26c-4-4 4-6 0-12M50 26c-4-4 4-6 0-12M66 26c-4-4 4-6 0-12" stroke="#b9c4ce" stroke-width="2.5" fill="none"/>'],
+ [/炖|焖|烧开|卤|收汁|烧（|小火/,'炖·焖','<path d="M22 32h56v16c0 10-8 16-28 16S22 58 22 48z" fill="#8b5a3c"/><rect x="18" y="26" width="64" height="8" rx="4" fill="#6e4229"/><circle cx="50" cy="22" r="4" fill="#6e4229"/><path d="M36 66l-4 6M64 66l4 6" stroke="#e8743b" stroke-width="3" stroke-linecap="round"/><path d="M40 70h20" stroke="#f2a33a" stroke-width="4" stroke-linecap="round"/>'],
+ [/蒸/,'蒸','<rect x="22" y="30" width="56" height="12" rx="3" fill="#d9b77a"/><rect x="22" y="44" width="56" height="12" rx="3" fill="#c9a362"/><path d="M26 36h48M26 50h48" stroke="#a8823f" stroke-width="1.5"/><path d="M36 24c-4-4 4-6 0-12M50 24c-4-4 4-6 0-12M64 24c-4-4 4-6 0-12" stroke="#b9c4ce" stroke-width="2.5" fill="none"/><path d="M38 64h24" stroke="#f2a33a" stroke-width="4" stroke-linecap="round"/>'],
+ [/炸/,'炸','<path d="M18 36h64l-6 22H24z" fill="#5d6670"/><path d="M22 40h56" stroke="#f0b43c" stroke-width="5"/><rect x="38" y="34" width="10" height="6" rx="2" fill="#d98b2b"/><rect x="54" y="33" width="10" height="7" rx="2" fill="#c97a22"/><circle cx="44" cy="30" r="2" fill="#f0b43c"/><circle cx="60" cy="28" r="2" fill="#f0b43c"/>'],
+ [/煎/,'煎','<ellipse cx="46" cy="44" rx="30" ry="12" fill="#3b4148"/><path d="M76 42h18" stroke="#3b4148" stroke-width="6" stroke-linecap="round"/><ellipse cx="40" cy="42" rx="10" ry="5" fill="#e7b25a"/><ellipse cx="56" cy="44" rx="9" ry="4.5" fill="#d99a3e"/><path d="M30 62l-2 6M62 62l2 6" stroke="#e8743b" stroke-width="3" stroke-linecap="round"/>'],
+ [/拌|调汁|淋|浇|蘸|调开/,'拌·调汁','<path d="M24 38h52c0 16-12 24-26 24S24 54 24 38z" fill="#fff" stroke="#c9b9a2" stroke-width="2"/><ellipse cx="50" cy="38" rx="26" ry="6" fill="#b5652d"/><path d="M62 14L50 40M70 16L56 40" stroke="#8b5a2b" stroke-width="3" stroke-linecap="round"/>'],
+ [/切|拍|掰|撕|剁|去皮|片成|剪/,'切·备料','<rect x="16" y="40" width="60" height="22" rx="4" fill="#d9b77a"/><rect x="30" y="34" width="14" height="10" rx="3" fill="#e85d3a"/><rect x="48" y="35" width="10" height="9" rx="3" fill="#6db55a"/><path d="M62 14l20 22-8 6-18-22z" fill="#c9d1d8"/><rect x="74" y="34" width="14" height="6" rx="2" transform="rotate(42 81 37)" fill="#4a3426"/>'],
+ [/出锅|装盘|摆盘|撒|盛出|卷起/,'出锅·装盘','<ellipse cx="50" cy="50" rx="34" ry="12" fill="#fffdf8" stroke="#e6dccb" stroke-width="2"/><ellipse cx="50" cy="48" rx="22" ry="7" fill="#c8402b"/><circle cx="44" cy="46" r="2" fill="#6db55a"/><circle cx="56" cy="48" r="2" fill="#6db55a"/><path d="M40 30c-3-3 3-5 0-9M54 30c-3-3 3-5 0-9" stroke="#c9b9a2" stroke-width="2" fill="none"/>'],
+ [/炒|翻|煸|滑/,'炒','<path d="M14 40h64c0 14-14 20-32 20S14 54 14 40z" fill="#3b4148"/><path d="M78 40h16" stroke="#3b4148" stroke-width="5" stroke-linecap="round"/><circle cx="36" cy="36" r="5" fill="#e85d3a"/><circle cx="50" cy="32" r="4" fill="#6db55a"/><rect x="54" y="34" width="9" height="6" rx="2" fill="#a3481d"/><path d="M30 64l-3 6M46 66v6M62 64l3 6" stroke="#e8743b" stroke-width="3" stroke-linecap="round"/>']
+];
+function stepArt(s){const a=ACT.find(([re])=>re.test(s))||ACT[ACT.length-1];return `<figure style="margin:8px 0 0;display:flex;align-items:center;gap:10px"><svg viewBox="0 0 100 76" width="96" height="72" aria-hidden="true" style="background:var(--soft);border-radius:10px;flex:none">${a[2]}</svg><figcaption class="meta">${a[1]}</figcaption></figure>`}
+
+/* ---------- 本机图片库（IndexedDB） ---------- */
+let dbp=null;
+function db(){if(!dbp)dbp=new Promise((ok,no)=>{const r=indexedDB.open('ckdb',1);r.onupgradeneeded=()=>{r.result.createObjectStore('covers');r.result.createObjectStore('diary',{keyPath:'id'})};r.onsuccess=()=>ok(r.result);r.onerror=()=>no(r.error)});return dbp}
+async function idb(storeName,mode,fn){const d=await db();return new Promise((ok,no)=>{const t=d.transaction(storeName,mode);const s=t.objectStore(storeName);const r=fn(s);t.oncomplete=()=>ok(r&&r.result);t.onerror=()=>no(t.error)})}
+async function loadImages(){try{
+  const d=await db();
+  await new Promise(ok=>{const t=d.transaction('covers');const s=t.objectStore('covers');s.openCursor().onsuccess=e=>{const c=e.target.result;if(c){covers[c.key]=c.value;c.continue()}};t.oncomplete=ok;t.onerror=ok});
+  diary=(await idb('diary','readonly',s=>s.getAll()))||[];diary.sort((a,b)=>b.id-a.id);render();
+}catch(e){}}
+function shrink(file,max){return new Promise((ok,no)=>{const u=URL.createObjectURL(file);const im=new Image();im.onload=()=>{const k=Math.min(1,max/Math.max(im.width,im.height));const c=document.createElement('canvas');c.width=Math.round(im.width*k);c.height=Math.round(im.height*k);c.getContext('2d').drawImage(im,0,0,c.width,c.height);URL.revokeObjectURL(u);ok(c.toDataURL('image/jpeg',0.82))};im.onerror=()=>{URL.revokeObjectURL(u);no()};im.src=u})}
+
+/* ---------- 家里有什么 ---------- */
+const PAN=[
+ ['肉蛋',[['猪肉',['猪','五花','里脊','前腿']],['排骨',['排骨','小排']],['牛肉',['牛']],['羊肉',['羊']],['鸡肉',['鸡腿','鸡翅','鸡胸','鸡肉']],['鸭肉',['鸭']],['鸡蛋',['鸡蛋','蛋清']],['腊肠',['腊肠']],['火腿',['火腿']]]],
+ ['鱼虾',[['鱼',['鲈鱼','鲫鱼','带鱼','黑鱼','草鱼']],['虾',['虾']],['花甲',['花甲']]]],
+ ['蔬菜',[['番茄',['番茄','西红柿']],['土豆',['土豆']],['青椒',['青椒','尖椒','螺丝椒']],['茄子',['茄子']],['黄瓜',['黄瓜']],['大白菜',['白菜']],['包菜',['包菜']],['生菜',['生菜']],['小青菜',['青菜']],['西兰花',['西兰花']],['花菜',['花菜']],['四季豆',['四季豆']],['豆芽',['豆芽']],['韭菜',['韭菜','韭黄']],['蒜苔',['蒜苔']],['蒜苗',['蒜苗']],['胡萝卜',['胡萝卜']],['洋葱',['洋葱']],['冬瓜',['冬瓜']],['丝瓜',['丝瓜']],['玉米',['玉米']],['山药',['山药']],['九层塔',['九层塔','罗勒']]]],
+ ['豆制品·干货',[['豆腐',['豆腐']],['豆腐皮',['豆腐皮']],['皮蛋',['皮蛋']],['木耳',['木耳']],['香菇',['香菇']],['海带',['海带']],['紫菜',['紫菜']],['虾皮',['虾皮']],['花生',['花生']],['酸菜',['酸菜']],['梅干菜',['梅干菜']]]],
+ ['主食',[['米饭/大米',['米饭','大米']],['面条',['面条']],['河粉',['河粉']],['面粉',['面粉']],['粉丝',['粉丝']]]]
+];
+let pantry=store.get('ck_pantry',[]),pantryExtra=store.get('ck_pantry_x','');
+function haveIng(name){const ex=pantryExtra.split(/[、,，\s]+/).filter(Boolean);for(const [,items] of PAN)for(const [lab,keys] of items)if(pantry.includes(lab)&&keys.some(k=>name.includes(k)))return true;return ex.some(k=>name.includes(k)||k.includes(name))}
+function canCook(){
+  const out=[];all().forEach(r=>{const main=r.i.filter(([n])=>!SEAS.includes(n));if(!main.length)return;const miss=main.filter(([n])=>!haveIng(n)).map(([n])=>n);const have=main.length-miss.length;if(have>0)out.push({r,miss,have,tot:main.length})});
+  out.sort((a,b)=>a.miss.length-b.miss.length||b.have-a.have);return out;
+}
+function fridgeView(){
+  const res=(pantry.length||pantryExtra.trim())?canCook():[],now=res.filter(x=>!x.miss.length),near=res.filter(x=>x.miss.length&&x.miss.length<=2);
+  const row=x=>`<div class="mi">${coverHtml(x.r,'th')}<div class="t" data-open="${esc(x.r.n)}"><b>${esc(x.r.n)}</b><div class="meta">${x.miss.length?'还差：'+x.miss.map(esc).join('、'):'食材齐了'} · 约${x.r.t||'?'}分钟</div></div><button class="order ${inMenu(x.r.n)?'on':''}" data-o="${esc(x.r.n)}" style="margin:0;flex:none">${inMenu(x.r.n)?'✓ 已点':'＋ 点菜'}</button></div>`;
+  $('#app').innerHTML=`<p class="meta" style="margin-top:14px">点选家里现有的食材（调料默认都有），下面马上告诉你能做什么。</p>
+  ${PAN.map(([g,items])=>`<h3 style="margin:16px 0 6px;font-size:16px">${g}</h3><div class="chips" style="flex-wrap:wrap;overflow:visible">${items.map(([lab])=>`<button data-p="${esc(lab)}" class="${pantry.includes(lab)?'act':''}">${esc(lab)}</button>`).join('')}</div>`).join('')}
+  <label class="f" for="pxIn">还有别的？（用顿号隔开）</label><input id="pxIn" value="${esc(pantryExtra)}" placeholder="比如：可乐、冬笋">
+  <div class="row"><button id="pClr">全部取消</button></div>
+  <div class="panel"><h3>现在就能做 ${now.length?`· ${now.length} 道`:''}</h3>${now.length?now.map(row).join(''):'<p class="meta">'+(res.length||pantry.length?'还凑不齐一道完整的菜，看看下面差一两样的':'先在上面点选家里有的食材')+'</p>'}</div>
+  ${near.length?`<div class="panel"><h3>只差一两样</h3>${near.slice(0,20).map(row).join('')}</div>`:''}
+  <p class="note">只在这个 App 的菜谱里找。想要更多新搭配，可以把家里有的东西发给 Claude 帮你配。</p>`;
+  $('#pxIn').onchange=e=>{pantryExtra=e.target.value;store.set('ck_pantry_x',pantryExtra);render()};
+  $('#pClr').onclick=()=>{pantry=[];pantryExtra='';store.set('ck_pantry',pantry);store.set('ck_pantry_x','');render()};
+}
+
+/* ---------- 今天吃什么：自动配菜 ---------- */
+function genMenu(){
+  const n=people<=2?2:people<=4?3:people<=6?4:5,soup=people>=3?1:0,meatN=Math.ceil((n-soup)/2),vegN=n-soup-meatN;
+  const fit={};if(pantry.length||pantryExtra.trim())canCook().forEach(x=>{fit[x.r.n]=x.miss.length===0?3:x.miss.length===1?1.2:0});
+  const score=r=>Math.random()*2+(fit[r.n]||0)+(favs.includes(r.n)?1:0)+(inMenu(r.n)?-5:0);
+  const pick=(pool,k)=>pool.map(r=>[score(r),r]).sort((a,b)=>b[0]-a[0]).slice(0,k).map(x=>x[1]);
+  const A=all();
+  sug=[...pick(A.filter(r=>r.c==='荤菜'||r.c==='鱼虾'),meatN),...pick(A.filter(r=>r.c==='素菜'||r.c==='凉菜'),vegN),...pick(A.filter(r=>r.c==='汤羹'),soup)];
+}
+function homeCards(){
+  const pc=pantry.length+pantryExtra.split(/[、,，\s]+/).filter(Boolean).length;
+  return `<div style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px;margin-top:14px">
+   <div class="panel" style="margin:0;background:hsl(350 80% 95%);border-color:hsl(350 60% 88%)"><b>家里几口人</b><div style="display:flex;align-items:center;gap:8px;margin-top:8px"><span style="font-size:28px;font-weight:700;color:var(--red);flex:1;white-space:nowrap">${people}人</span><button id="pMinus" aria-label="减少" style="border-radius:50%;width:44px;padding:0">−</button><button id="pPlus" aria-label="增加" style="border-radius:50%;width:44px;padding:0">＋</button></div><div class="meta">份量按人数自动算</div></div>
+   <div style="display:grid;gap:10px">
+    <button id="fridgeGo" class="panel" style="margin:0;text-align:left;background:hsl(205 80% 94%);border-color:hsl(205 60% 86%);min-height:0;display:block"><b>🧺 冰箱库存</b><div class="meta">${pc?`选了 ${pc} 样，看看能做什么`:'点这里选家里有的菜'}</div></button>
+    <button id="favGo" class="panel" style="margin:0;text-align:left;background:hsl(265 70% 95%);border-color:hsl(265 50% 88%);min-height:0;display:block"><b>❤ 我的口味</b><div class="meta">已收藏 ${favs.length} 道</div></button>
+   </div></div>
+   <div class="panel" style="background:linear-gradient(135deg,#fff3e0,#ffe0cc);border-color:#f3cfb2">
+    <h3 style="margin-bottom:4px">今天吃什么？</h3>
+    ${sug?`<div class="meta" style="margin-bottom:6px">${people} 个人，配了 ${sug.length} 道${(pantry.length||pantryExtra.trim())?'（优先用冰箱里的）':''}</div>${sug.map(r=>`<div class="mi">${coverHtml(r,'th')}<div class="t" data-open="${esc(r.n)}"><b>${esc(r.n)}</b><div class="meta">${esc(r.c)} · 约${r.t||'?'}分钟</div></div></div>`).join('')}
+      <div class="row"><button id="genAgain" style="flex:1">🔄 换一批</button><button class="pri" id="genTake" style="flex:1">就吃这些</button></div>`
+     :`<p class="meta" style="margin:0 0 10px">按家里人数自动配一桌：有荤有素，人多加个汤。</p><button class="pri full" id="genGo" style="min-height:50px;font-size:18px">✨ 生成菜单</button>`}
+   </div>`;
+}
+
+/* ---------- 份量换算 ---------- */
+function scale(a,x){if(x===1)return a;return a.replace(/(\d+(?:\.\d+)?)/,m=>{const v=+m*x;return String(Math.round(v*10)/10)}).replace(/^半(勺|个|根|颗)/,(m,u)=>x>=2?Math.round(x/2*10)/10+u:'半'+u+'×'+x).replace(/^(一|1)(把|小把|块|颗|根|小撮)/,(m,a2,u)=>x+u)}
+
+/* ---------- 页面 ---------- */
+function badge(){const b=$('#badge');const n=menu.items.length;b.hidden=!n;b.textContent=n}
+function setNav(v){view=v;prev=v;document.querySelectorAll('#nav button').forEach(b=>b.classList.toggle('act',b.dataset.v===v));$('#back').hidden=true;$('#ttl').textContent={list:'家常菜谱',menu:'今日菜单',shop:'买菜清单',diary:'做饭日记'}[v];render();scrollTo(0,0)}
+function sub(v,title){if(['list','menu','shop','diary'].includes(view))prev=view;view=v;$('#back').hidden=false;$('#ttl').textContent=title;render();scrollTo(0,0)}
+function dishCard(r){const o=inMenu(r.n);return `<div class="dish" data-n="${esc(r.n)}">${coverHtml(r,'cover')}<div class="t"><b>${esc(r.n)}</b><span class="meta">${esc(r.c)} · 约${r.t||'?'}分钟${favs.includes(r.n)?' · ★':''}</span><button class="order ${o?'on':''}" data-o="${esc(r.n)}">${o?'✓ 已点':'＋ 点菜'}</button></div></div>`}
 function render(){
-  const A=$('#app');
+  badge();const A=$('#app');
   if(view==='list'){
-    const list=all().filter(r=>(cat==='全部'||r.c===cat)&&(!q||(r.n+r.i.map(x=>x[0]).join('')).includes(q)));
-    A.innerHTML=`<input class="search" id="q" type="search" placeholder="搜菜名或食材，比如：鸡蛋、土豆" value="${esc(q)}">
+    const list=all().filter(r=>(cat==='全部'||(cat==='收藏'?favs.includes(r.n):cat==='快手菜'?(r.t&&r.t<=15):cat==='我加的'?r.mine:r.c===cat))&&(!q||(r.n+r.i.map(x=>x[0]).join('')).includes(q)));
+    A.innerHTML=`${banner?`<div class="banner">${esc(banner)}</div>`:''}${!q&&cat==='全部'?homeCards():''}<input class="search" id="q" type="search" placeholder="搜菜名或食材，比如：鸡蛋、土豆" value="${esc(q)}">
     <div class="chips">${CATS.map(c=>`<button data-c="${c}" class="${c===cat?'act':''}">${c}</button>`).join('')}</div>
-    ${list.length?list.map(cardHtml).join(''):'<p class="empty">没找到，换个词试试</p>'}`;
-    const qi=$('#q');qi.oninput=e=>{q=e.target.value.trim();const pos=qi.selectionStart;render();const n=$('#q');n.focus();try{n.setSelectionRange(pos,pos)}catch(e){}};
-  }else if(view==='favs'){
-    const list=favs.map(byName).filter(Boolean);
-    A.innerHTML=list.length?list.map(cardHtml).join(''):'<p class="empty">还没有收藏。点菜谱右边的 ☆ 就能收藏。</p>';
-  }else if(view==='shop'){
-    A.innerHTML=shop.length?`<h3>要买的东西（点一下划掉）</h3><ul class="ing shop">${shop.map((x,i)=>`<li data-s="${i}" class="${x.d?'done':''}"><span class="box">${x.d?'✓':''}</span><span>${esc(x.n)}</span><span>${esc(x.a)}</span></li>`).join('')}</ul>
-      <div class="row"><button id="clrDone">清掉已买的</button><button id="clrAll">全部清空</button><button id="copyShop">复制清单</button></div><p class="note" id="cmsg"></p>`
-      :'<p class="empty">清单是空的。打开一道菜，点"加到买菜清单"。</p>';
-  }else if(view==='mine'){
-    A.innerHTML=`<div class="row"><button class="pri" id="addNew">＋ 添加我自己的菜</button></div>${mine.length?mine.map(r=>cardHtml({...r,mine:1})).join(''):'<p class="empty">把家里的拿手菜记下来，以后就不会忘了。</p>'}`;
+    ${cat==='我加的'?'<div class="row"><button class="pri" id="addNew">＋ 记下自己的拿手菜</button></div>':''}
+    ${list.length?`<div class="grid">${list.map(dishCard).join('')}</div>`:`<p class="empty">${cat==='收藏'?'还没有收藏，打开一道菜点 ☆ 收藏':cat==='我加的'?'把家里的拿手菜记下来吧':'没找到，换个词试试'}</p>`}
+    <p class="note">共 ${all().length} 道菜。插图是示意；做完拍张照设成封面，就会显示你家做的样子。</p>`;
+    const qi=$('#q');qi.oninput=e=>{q=e.target.value.trim();const p=qi.selectionStart;render();const n=$('#q');n.focus();try{n.setSelectionRange(p,p)}catch(e){}};
   }else if(view==='detail')detail();
   else if(view==='edit')editForm();
+  else if(view==='menu')menuView();
+  else if(view==='cook')cookView();
+  else if(view==='shop')shopView();
+  else if(view==='diary')diaryView();
+  else if(view==='newdiary')newDiary();
+  else if(view==='fridge')fridgeView();
 }
-function open(n){cur=byName(n);if(!cur)return;if(view!=='detail'&&view!=='edit')prev=view;checked={};view='detail';$('#back').hidden=false;$('#ttl').textContent=cur.n;render();scrollTo(0,0)}
+function open(n){cur=byName(n);if(!cur)return;checked={};sub('detail',cur.n)}
 function detail(){
-  const r=cur,f=favs.includes(r.n);
-  $('#app').innerHTML=`<h2>${esc(r.n)}</h2><div class="meta">${esc(r.c)} · 约 ${r.t||'?'} 分钟</div>
-  <div class="row"><button class="fav ${f?'y':''}" data-f="${esc(r.n)}" style="border:1px solid var(--line);border-radius:12px;padding:0 14px;font-size:16px">${f?'★ 已收藏':'☆ 收藏'}</button><button id="toShop">加到买菜清单</button><button id="wakeBtn">${wake?'屏幕常亮：开':'做菜时屏幕常亮'}</button></div>
-  <h3>食材（备好一样点一下）</h3><ul class="ing">${r.i.map((x,k)=>`<li data-k="${k}" class="${checked[k]?'done':''}"><span class="box">${checked[k]?'✓':''}</span><span>${esc(x[0])}</span><span>${esc(x[1])}</span></li>`).join('')}</ul>
-  <h3>步骤</h3><ol class="steps">${r.s.map((s,k)=>{const m=mins(s);return `<li>${esc(s)}${m?`<br><button class="tbtn" data-m="${m}" data-k="${k}">⏱ 计时 ${m} 分钟</button>`:''}</li>`}).join('')}</ol>
+  const r=cur,f=favs.includes(r.n),o=inMenu(r.n),k=encodeURIComponent(r.n+' 做法');
+  $('#app').innerHTML=`${coverHtml(r,'cover hero')}<h2>${esc(r.n)}</h2><div class="meta">${esc(r.c)} · 约 ${r.t||'?'} 分钟</div>
+  <div class="row"><button class="${o?'':'pri'}" data-o="${esc(r.n)}">${o?'✓ 已在今日菜单':'＋ 点这道菜'}</button><button data-f="${esc(r.n)}">${f?'★ 已收藏':'☆ 收藏'}</button>
+  <label class="filebtn" style="border:1px solid var(--line);border-radius:12px;min-height:44px;padding:0 14px;background:var(--card)">📷 拍照当封面<input type="file" accept="image/*" id="coverIn"></label>${covers[r.n]?'<button id="coverDel">恢复插图</button>':''}</div>
+  <h3>食材（备好一样点一下）</h3><ul class="ing">${r.i.map((x,j)=>`<li data-k="${j}" class="${checked[j]?'done':''}"><span class="box">${checked[j]?'✓':''}</span><span class="nm">${esc(x[0])}</span><span class="amt">${esc(x[1])}</span></li>`).join('')}</ul>
+  <div class="row"><button id="toShop">食材加到买菜清单</button><button id="wakeBtn">${wake?'屏幕常亮：开':'做菜时屏幕常亮'}</button></div>
+  <h3>步骤</h3><ol class="steps">${r.s.map((s,j)=>{const m=mins(s);return `<li>${esc(s)}${stepArt(s)}${m?`<button class="tbtn" data-m="${m}" data-l="${esc(r.n)} · 第${j+1}步">⏱ 计时 ${m} 分钟</button>`:''}</li>`}).join('')}</ol>
+  <h3>看视频教程</h3><div class="row">
+   <a class="pri" style="display:inline-flex;align-items:center;padding:0 14px;min-height:44px;border-radius:12px;text-decoration:none;color:#fff;background:#fb7299" href="https://search.bilibili.com/all?keyword=${k}" target="_blank" rel="noopener">B站</a>
+   <a style="display:inline-flex;align-items:center;padding:0 14px;min-height:44px;border-radius:12px;text-decoration:none;color:#fff;background:#161823" href="https://www.douyin.com/search/${k}" target="_blank" rel="noopener">抖音</a>
+   <a style="display:inline-flex;align-items:center;padding:0 14px;min-height:44px;border-radius:12px;text-decoration:none;color:#fff;background:#d4322c" href="https://www.youtube.com/results?search_query=${k}" target="_blank" rel="noopener">YouTube</a></div>
   ${r.mine?`<div class="row"><button id="edit">修改</button><button id="del">删除</button></div>`:''}
-  <p class="note">用量是家常参考，按自家口味增减。</p>`;
-  $('#toShop').onclick=()=>{r.i.forEach(([n,a])=>{if(!shop.some(x=>x.n===n))shop.push({n,a,d:0})});save();$('#toShop').textContent='已加入 ✓'};
+  <p class="note">用量是家常参考（约 2～3 人份），按自家口味增减。步骤小图是动作示意，真人演示请看视频。</p>`;
+  $('#toShop').onclick=()=>{addShop(r,1);$('#toShop').textContent='已加入 ✓'};
   $('#wakeBtn').onclick=toggleWake;
-  if(r.mine){$('#edit').onclick=()=>{view='edit';render()};
-    $('#del').onclick=()=>{const b=$('#del');if(b.dataset.c){mine=mine.filter(x=>x.n!==r.n);favs=favs.filter(x=>x!==r.n);save();setNav('mine')}else{b.dataset.c=1;b.textContent='再点一次确认删除'}}}
+  $('#coverIn').onchange=async e=>{const f=e.target.files[0];if(!f)return;try{const u=await shrink(f,900);covers[r.n]=u;await idb('covers','readwrite',s=>s.put(u,r.n));render()}catch(err){alertBox('照片没存成功，换一张试试')}};
+  if($('#coverDel'))$('#coverDel').onclick=async()=>{delete covers[r.n];try{await idb('covers','readwrite',s=>s.delete(r.n))}catch(e){}render()};
+  if(r.mine){$('#edit').onclick=()=>sub('edit','修改菜谱');
+    $('#del').onclick=()=>{const b=$('#del');if(b.dataset.c){mine=mine.filter(x=>x.n!==r.n);favs=favs.filter(x=>x!==r.n);menu.items=menu.items.filter(x=>x.n!==r.n);save();cat='我加的';setNav('list')}else{b.dataset.c=1;b.textContent='再点一次确认删除'}}}
+}
+function alertBox(t){banner=t;render();setTimeout(()=>{banner='';},4000)}
+function addShop(r,x){r.i.forEach(([n,a])=>{if(SEAS.includes(n))return;const ex=shop.find(s=>s.n===n);const am=scale(a,x);if(ex){if(!ex.a.includes(am))ex.a+=' + '+am;ex.d=0}else shop.push({n,a:am,d:0})});save()}
+function merged(){
+  const x=xOf(people),mainM={},seas=new Set();
+  menu.items.forEach(it=>{const r=byName(it.n);if(!r)return;r.i.forEach(([n,a])=>{if(SEAS.includes(n)){seas.add(n);return}(mainM[n]=mainM[n]||[]).push(scale(a,x)+(menu.items.length>1?'（'+r.n+'）':''))})});
+  return {main:Object.entries(mainM),seas:[...seas]};
+}
+function menuView(){
+  const items=menu.items,m=merged(),longest=Math.max(0,...items.map(it=>(byName(it.n)||{}).t||0));
+  $('#app').innerHTML=`${banner?`<div class="banner">${esc(banner)}</div>`:''}
+  <div class="panel"><h3>今日菜单 ${items.length?`· ${items.length} 道`:''}</h3>
+   ${items.length?items.map((it,j)=>{const r=byName(it.n)||{n:it.n,c:'荤菜'};return `<div class="mi">${coverHtml(r,'th')}<div class="t" data-open="${esc(it.n)}"><b>${esc(it.n)}</b><div class="meta">${it.by?esc(it.by)+' 点的 · ':''}约${r.t||'?'}分钟 · 点开看做法</div></div><button class="x" data-rm="${j}" aria-label="去掉">×</button></div>`}).join('')
+    :'<p class="meta">还没点菜。去"菜谱"里点"＋ 点菜"，或者让家人、客人点好发给你。</p>'}
+   ${items.length?`<p class="meta">最费时的一道约 ${longest} 分钟，建议先做它。</p>`:''}
+  </div>
+  ${items.length?`
+  <div class="panel"><h3>几个人吃</h3><div style="display:flex;align-items:center;gap:10px"><span style="font-size:28px;font-weight:700;color:var(--red);flex:1">${people} 人<span class="meta" style="font-weight:400"> · 用量×${xOf(people)}</span></span><button id="pMinus" style="border-radius:50%;width:44px;padding:0">−</button><button id="pPlus" style="border-radius:50%;width:44px;padding:0">＋</button></div><p class="note">来客人就加人数，下面要买的用量会跟着变。菜谱原量约 2～3 人份。</p></div>
+  <div class="panel"><h3>需要买的材料</h3><ul class="ing">${m.main.map(([n,a])=>`<li style="cursor:default"><span class="nm">${esc(n)}</span><span class="amt">${a.map(esc).join('<br>')}</span></li>`).join('')}</ul>
+   <p class="seas"><b>调料</b>（看看家里够不够）：${m.seas.map(esc).join('、')}</p>
+   <button class="pri full" id="mShop">全部加到买菜清单</button></div>
+  <div class="panel"><h3>开始做</h3><button class="pri full" id="cookGo">▶ 一步一步带我做</button><p class="note">按"先做费时的"排好顺序，一屏一步，字大，要等的步骤能直接计时。</p>
+   <label class="filebtn pri full" style="margin-top:6px;border-radius:12px;min-height:44px;background:var(--green);color:#fff">📷 做好了，拍照记到日记<input type="file" accept="image/*" id="doneIn"></label></div>`:''}
+  <div class="panel"><h3>让家人或客人点菜</h3>
+   <label class="f" for="meIn">点菜人（用这台手机点菜的人）</label><input id="meIn" value="${esc(me)}" placeholder="比如：女儿、王阿姨">
+   <div class="row"><button id="shareLink">把点菜链接发给别人</button>${items.length?'<button id="sendOrder">把我点的菜发给做饭的人</button>':''}</div>
+   <label class="f" for="pasteIn">收到别人发来的点菜单？粘贴到这里</label><textarea id="pasteIn" placeholder="长按粘贴，比如：【点菜单】来自：王阿姨 1. 红烧肉 2. 清蒸鱼"></textarea>
+   <button class="full" id="pasteGo" style="margin-top:8px">加入今日菜单</button>
+   <p class="note" id="shMsg">客人不用装 App：用微信打开链接就能点菜，点完按"把我点的菜发给做饭的人"发回给你。</p></div>
+  ${items.length?'<div class="row"><button id="clrMenu">清空今日菜单</button></div>':''}`;
+  setTimeout(()=>{banner=''},5000);
+  $('#meIn').onchange=e=>{me=e.target.value.trim();save()};
+  $('#shareLink').onclick=()=>share('来帮我点菜吧！打开链接，在想吃的菜上点"＋ 点菜"，点完去"今日菜单"按"把我点的菜发给做饭的人"：\n'+appUrl());
+  if($('#sendOrder'))$('#sendOrder').onclick=()=>{me=$('#meIn').value.trim();save();share(orderText())};
+  $('#pasteGo').onclick=()=>{const n=importOrder($('#pasteIn').value);$('#shMsg').textContent=n?`加入了 ${n} 道菜`:'没认出菜名，请粘贴完整的点菜单';if(n){banner=`收到 ${n} 道菜，已加入今日菜单`;render()}};
+  if(items.length){
+    $('#mShop').onclick=()=>{menu.items.forEach(it=>{const r=byName(it.n);if(r)addShop(r,xOf(people))});$('#mShop').textContent='已加入买菜清单 ✓'};
+    $('#cookGo').onclick=startCook;
+    $('#doneIn').onchange=async e=>{const f=e.target.files[0];if(!f)return;try{newPhoto=await shrink(f,1280);sub('newdiary','记到日记')}catch(err){alertBox('照片读取失败，换一张试试')}};
+    $('#clrMenu').onclick=e=>{const b=e.target;if(b.dataset.c){menu.items=[];save();render()}else{b.dataset.c=1;b.textContent='再点一次确认清空'}};
+  }
+}
+function appUrl(){return location.href.split('#')[0].split('?')[0]}
+function orderText(){return `【点菜单】来自：${me||'家人'}\n${menu.items.map((it,j)=>`${j+1}. ${it.n}`).join('\n')}\n（在"家常菜谱"的今日菜单里粘贴即可）\n${appUrl()}?order=${encodeURIComponent(menu.items.map(i=>i.n).join('|'))}&by=${encodeURIComponent(me||'')}`}
+async function share(text){
+  try{if(navigator.share){await navigator.share({text});return}}catch(e){if(e&&e.name==='AbortError')return}
+  try{await navigator.clipboard.writeText(text);$('#shMsg').textContent='已复制，去微信粘贴发送'}catch(e){$('#pasteIn').value=text;$('#shMsg').textContent='请长按上面框里的文字复制，再发到微信'}
+}
+function importOrder(t){
+  if(!t)return 0;const by=(t.match(/来自[:：]\s*([^\s\n]+)/)||[])[1]||'';
+  const names=all().map(r=>r.n).sort((a,b)=>b.length-a.length);let rest=t.split('http')[0],n=0;
+  for(const nm of names){if(rest.includes(nm)){rest=rest.split(nm).join('');if(!inMenu(nm)){menu.items.push({n:nm,by});n++}}}
+  save();return n;
+}
+function startCook(){
+  const ds=menu.items.map(it=>byName(it.n)).filter(Boolean).sort((a,b)=>(b.t||0)-(a.t||0));
+  if(!ds.length)return;ck={ds,d:0,s:0,showIng:true};sub('cook','跟着做');
+}
+function cookView(){
+  const {ds,d,s}=ck,r=ds[d],tot=ds.reduce((a,x)=>a+x.s.length,0),done=ds.slice(0,d).reduce((a,x)=>a+x.s.length,0)+s;
+  if(d>=ds.length){$('#app').innerHTML=`<h2>全部做完了！</h2><p>辛苦啦，开饭 🍚</p><label class="filebtn pri full" style="border-radius:12px;min-height:52px;background:var(--green);color:#fff">📷 拍照记到日记<input type="file" accept="image/*" id="doneIn2"></label><div class="row"><button class="full" id="ckBack">回到今日菜单</button></div>`;
+    $('#doneIn2').onchange=async e=>{const f=e.target.files[0];if(!f)return;try{newPhoto=await shrink(f,1280);view='newdiary';$('#ttl').textContent='记到日记';render()}catch(err){}};
+    $('#ckBack').onclick=()=>setNav('menu');return}
+  const step=r.s[s],m=mins(step);
+  $('#app').innerHTML=`<div class="prog"><i style="width:${Math.round(done/tot*100)}%"></i></div>
+  <div class="meta">第 ${d+1} 道 / 共 ${ds.length} 道 · 总进度 ${done}/${tot}</div>
+  <div class="mi" style="border:0">${coverHtml(r,'th')}<div class="t"><b style="font-size:20px">${esc(r.n)}</b><div class="meta">第 ${s+1} 步 / 共 ${r.s.length} 步</div></div></div>
+  ${s===0?`<details ${ck.showIng?'open':''} class="panel" id="ingBox"><summary><b>这道菜要备的料</b></summary><ul class="ing">${r.i.map(x=>`<li style="cursor:default"><span class="nm">${esc(x[0])}</span><span class="amt">${esc(scale(x[1],xOf(people)))}</span></li>`).join('')}</ul></details>`:''}
+  <div class="big">${esc(step)}</div>${stepArt(step)}
+  ${m?`<button class="tbtn" data-m="${m}" data-l="${esc(r.n)} · 第${s+1}步" style="min-height:48px;font-size:17px">⏱ 计时 ${m} 分钟</button>`:''}
+  <div class="row" style="margin-top:24px"><button id="pv" ${d===0&&s===0?'disabled':''} style="flex:1">‹ 上一步</button><button class="pri" id="nx" style="flex:2;min-height:56px;font-size:19px">${s===r.s.length-1?(d===ds.length-1?'做完了 ✓':'这道好了，下一道 ›'):'下一步 ›'}</button></div>
+  <div class="row"><button id="wakeBtn">${wake?'屏幕常亮：开':'做菜时屏幕常亮'}</button></div>`;
+  $('#nx').onclick=()=>{if(s<r.s.length-1)ck.s++;else{ck.d++;ck.s=0}render();scrollTo(0,0)};
+  $('#pv').onclick=()=>{if(s>0)ck.s--;else if(d>0){ck.d--;ck.s=ds[ck.d].s.length-1}render()};
+  $('#wakeBtn').onclick=toggleWake;
+  if(!wake&&'wakeLock' in navigator&&!ck.triedWake){ck.triedWake=1;toggleWake()}
+}
+function shopView(){
+  $('#app').innerHTML=shop.length?`<h3>要买的东西（买到了点一下划掉）</h3><ul class="ing">${shop.map((x,i)=>`<li data-s="${i}" class="${x.d?'done':''}"><span class="box">${x.d?'✓':''}</span><span class="nm">${esc(x.n)}</span><span class="amt">${esc(x.a)}</span></li>`).join('')}</ul>
+    <div class="row"><button id="clrDone">清掉已买的</button><button id="clrAll">全部清空</button><button id="copyShop">发给家人去买</button></div><p class="note" id="shMsg">调料没有列进来，记得看看家里够不够。</p>`
+    :'<p class="empty">清单是空的。<br>在"今日菜单"里点"全部加到买菜清单"，或者打开一道菜加入。</p><p class="note" id="shMsg"></p>';
+}
+function diaryView(){
+  $('#app').innerHTML=`${banner?`<div class="banner">${esc(banner)}</div>`:''}<div class="row"><label class="filebtn pri full" style="border-radius:12px;min-height:48px">📷 拍照记一顿饭<input type="file" accept="image/*" id="dIn"></label></div>
+  ${diary.length?diary.map(e=>`<div class="diary">${e.photo?`<img src="${e.photo}" alt="${esc(e.dishes.join('、'))}">`:''}<div class="t"><b>${esc(e.date)}</b><div>${esc(e.dishes.join('、')||'')}</div>${e.who?`<div class="meta">点菜：${esc(e.who)}</div>`:''}${e.note?`<p style="margin:6px 0 0">${esc(e.note)}</p>`:''}
+   <div class="row"><button data-share="${e.id}">分享</button>${e.dishes.length===1&&e.photo?`<button data-cv="${e.id}">设为「${esc(e.dishes[0])}」封面</button>`:''}<button data-dd="${e.id}">删除</button></div></div></div>`).join('')
+   :'<p class="empty">还没有记录。做完饭拍张照，记下这顿吃了什么。</p>'}
+  <p class="note">照片只存在这台手机里，换手机或清理浏览器数据会丢失，重要的照片记得另外保存。</p>`;setTimeout(()=>{banner=''},5000);
+  $('#dIn').onchange=async e=>{const f=e.target.files[0];if(!f)return;try{newPhoto=await shrink(f,1280);sub('newdiary','记到日记')}catch(err){}};
+}
+function newDiary(){
+  const pre=menu.items.map(i=>i.n).join('、'),who=[...new Set(menu.items.map(i=>i.by).filter(Boolean))].join('、');
+  $('#app').innerHTML=`${newPhoto?`<img class="preview" src="${newPhoto}" alt="">`:''}
+  <label class="f" for="dDate">日期</label><input id="dDate" type="date" value="${today()}">
+  <label class="f" for="dDish">做了哪些菜（用顿号隔开）</label><input id="dDish" value="${esc(pre)}">
+  <label class="f" for="dWho">谁点的 / 谁来吃饭</label><input id="dWho" value="${esc(who)}">
+  <label class="f" for="dNote">记几句</label><textarea id="dNote" placeholder="比如：客人说红烧肉好吃，下次糖少放一点"></textarea>
+  ${menu.items.length?'<label class="small" style="display:flex;gap:10px;align-items:center;margin-top:12px"><input type="checkbox" id="dClr" checked style="width:22px;height:22px">保存后清空今日菜单</label>':''}
+  <div class="row"><button class="pri" id="dSave" style="flex:1">保存到日记</button></div>`;
+  $('#dSave').onclick=async()=>{const e={id:Date.now(),date:$('#dDate').value||today(),dishes:$('#dDish').value.split(/[、,，\s]+/).filter(Boolean),who:$('#dWho').value.trim(),note:$('#dNote').value.trim(),photo:newPhoto};
+    try{await idb('diary','readwrite',s=>s.put(e));diary.unshift(e);if($('#dClr')&&$('#dClr').checked){menu.items=[];save()}newPhoto='';banner='已记到日记 ✓';setNav('diary')}catch(err){$('#dSave').textContent='保存失败，手机空间可能不够'}};
 }
 function editForm(){
-  const r=cur&&cur.mine?cur:{n:'',c:'荤菜',t:'',i:[],s:[]};
-  $('#back').hidden=false;$('#ttl').textContent=r.n?'修改菜谱':'添加菜谱';
+  const r=cur&&cur.mine&&view==='edit'&&$('#ttl').textContent==='修改菜谱'?cur:{n:'',c:'荤菜',t:'',i:[],s:[]};
   $('#app').innerHTML=`<form id="ef"><label class="f" for="en">菜名</label><input id="en" required value="${esc(r.n)}" placeholder="比如：妈妈的红烧鱼">
-  <label class="f" for="ec">分类</label><select id="ec">${CATS.slice(1).map(c=>`<option ${c===r.c?'selected':''}>${c}</option>`).join('')}</select>
+  <label class="f" for="ec">分类</label><select id="ec">${CATS.slice(3,9).map(c=>`<option ${c===r.c?'selected':''}>${c}</option>`).join('')}</select>
   <label class="f" for="et">大约多少分钟</label><input id="et" type="number" inputmode="numeric" value="${esc(r.t)}">
   <label class="f" for="ei">食材（一行一样，名称和用量中间空一格）</label><textarea id="ei" placeholder="鸡蛋 3个&#10;番茄 2个">${esc(r.i.map(x=>x.join(' ')).join('\n'))}</textarea>
-  <label class="f" for="es">步骤（一行一步；要计时就写成"（10分钟）"）</label><textarea id="es" style="min-height:160px" placeholder="番茄切块&#10;小火炖（10分钟）">${esc(r.s.join('\n'))}</textarea>
+  <label class="f" for="es">步骤（一行一步；要计时就写"（10分钟）"）</label><textarea id="es" style="min-height:160px" placeholder="番茄切块&#10;小火炖（10分钟）">${esc(r.s.join('\n'))}</textarea>
   <div class="row"><button class="pri" type="submit">保存</button></div><p class="note" id="emsg"></p></form>`;
-  $('#ef').onsubmit=e=>{e.preventDefault();
-    const n=$('#en').value.trim();if(!n)return;
+  $('#ef').onsubmit=e=>{e.preventDefault();const n=$('#en').value.trim();if(!n)return;
     if(n!==r.n&&all().some(x=>x.n===n)){$('#emsg').textContent='已经有同名的菜了，换个名字吧';return}
-    const rec={n,c:$('#ec').value,t:+$('#et').value||0,
-      i:$('#ei').value.split('\n').map(l=>l.trim()).filter(Boolean).map(l=>{const p=l.split(/\s+/);return [p[0],p.slice(1).join(' ')||'适量']}),
-      s:$('#es').value.split('\n').map(l=>l.trim().replace(/\((\d+)分钟\)/,'（$1分钟）')).filter(Boolean)};
+    const rec={n,c:$('#ec').value,t:+$('#et').value||0,i:$('#ei').value.split('\n').map(l=>l.trim()).filter(Boolean).map(l=>{const p=l.split(/\s+/);return [p[0],p.slice(1).join(' ')||'适量']}),s:$('#es').value.split('\n').map(l=>l.trim().replace(/\((\d+)分钟\)/,'（$1分钟）')).filter(Boolean)};
     if(r.n){mine=mine.map(x=>x.n===r.n?rec:x);favs=favs.map(x=>x===r.n?n:x)}else mine.unshift(rec);
-    save();open(n)};
+    save();cur=byName(n);view='detail';$('#ttl').textContent=n;render()};
 }
 function startTimer(m,label){
-  clearInterval(tm);tLeft=m*60;const T=$('#timer');T.hidden=false;T.classList.remove('ring');$('#tlbl').textContent=label;
-  const end=Date.now()+tLeft*1000;const tick=()=>{tLeft=Math.max(0,Math.round((end-Date.now())/1000));$('#tnum').textContent=String(Math.floor(tLeft/60)).padStart(2,'0')+':'+String(tLeft%60).padStart(2,'0');if(!tLeft){clearInterval(tm);T.classList.add('ring');$('#tlbl').textContent='时间到！'+label;beep()}};
+  clearInterval(tm);const T=$('#timer');T.hidden=false;T.classList.remove('ring');$('#tlbl').textContent=label;
+  const end=Date.now()+m*60000;const tick=()=>{const left=Math.max(0,Math.round((end-Date.now())/1000));$('#tnum').textContent=String(Math.floor(left/60)).padStart(2,'0')+':'+String(left%60).padStart(2,'0');if(!left){clearInterval(tm);T.classList.add('ring');$('#tlbl').textContent='时间到！'+label;beep()}};
   tick();tm=setInterval(tick,500);
 }
 let actx=null;
 function beep(){try{actx=actx||new (window.AudioContext||window.webkitAudioContext)();for(let k=0;k<6;k++){const o=actx.createOscillator(),g=actx.createGain();o.frequency.value=880;o.connect(g);g.connect(actx.destination);const t0=actx.currentTime+k*0.5;g.gain.setValueAtTime(0.3,t0);g.gain.setValueAtTime(0,t0+0.25);o.start(t0);o.stop(t0+0.3)}}catch(e){}try{navigator.vibrate&&navigator.vibrate([300,200,300])}catch(e){}}
 async function toggleWake(){
-  try{if(wake){await wake.release();wake=null}else if('wakeLock' in navigator){wake=await navigator.wakeLock.request('screen');wake.addEventListener('release',()=>{wake=null})}else{$('#wakeBtn').textContent='这台手机不支持';return}}catch(e){$('#wakeBtn').textContent='没能开启';return}
-  $('#wakeBtn').textContent=wake?'屏幕常亮：开':'做菜时屏幕常亮';
+  const b=$('#wakeBtn');
+  try{if(wake){await wake.release();wake=null}else if('wakeLock' in navigator){wake=await navigator.wakeLock.request('screen');wake.addEventListener('release',()=>{wake=null})}else{if(b)b.textContent='这台手机不支持常亮';return}}catch(e){if(b)b.textContent='常亮没能开启';return}
+  if($('#wakeBtn'))$('#wakeBtn').textContent=wake?'屏幕常亮：开':'做菜时屏幕常亮';
 }
-document.addEventListener('visibilitychange',async()=>{if(wake===null&&document.visibilityState==='visible'&&$('#wakeBtn')&&$('#wakeBtn').textContent.includes('：开')){try{wake=await navigator.wakeLock.request('screen')}catch(e){}}});
+async function dataUrlToFile(u,name){const r=await fetch(u);const b=await r.blob();return new File([b],name,{type:'image/jpeg'})}
 
-$('#app').addEventListener('click',e=>{
-  const f=e.target.closest('[data-f]');if(f){e.stopPropagation();const n=f.dataset.f;favs=favs.includes(n)?favs.filter(x=>x!==n):[n,...favs];save();render();return}
+$('#app').addEventListener('click',async e=>{
+  const o=e.target.closest('[data-o]');if(o){e.stopPropagation();const n=o.dataset.o;if(inMenu(n))menu.items=menu.items.filter(x=>x.n!==n);else menu.items.push({n,by:me});save();render();return}
+  const f=e.target.closest('[data-f]');if(f){const n=f.dataset.f;favs=favs.includes(n)?favs.filter(x=>x!==n):[n,...favs];save();render();return}
   const c=e.target.closest('[data-c]');if(c){cat=c.dataset.c;render();return}
-  const card=e.target.closest('.card');if(card){open(card.dataset.n);return}
+  const card=e.target.closest('.dish');if(card){open(card.dataset.n);return}
+  const op=e.target.closest('[data-open]');if(op){open(op.dataset.open);return}
+  const rm=e.target.closest('[data-rm]');if(rm){menu.items.splice(+rm.dataset.rm,1);save();render();return}
   const li=e.target.closest('li[data-k]');if(li&&view==='detail'){checked[li.dataset.k]=!checked[li.dataset.k];render();return}
-  const t=e.target.closest('.tbtn');if(t){try{actx=actx||new (window.AudioContext||window.webkitAudioContext)();actx.resume()}catch(e){}document.querySelectorAll('.steps li').forEach((x,k)=>x.classList.toggle('cur',k==t.dataset.k));startTimer(+t.dataset.m,cur.n+' · 第'+(+t.dataset.k+1)+'步');return}
+  const t=e.target.closest('.tbtn');if(t){try{actx=actx||new (window.AudioContext||window.webkitAudioContext)();actx.resume()}catch(err){}startTimer(+t.dataset.m,t.dataset.l);return}
   const s=e.target.closest('li[data-s]');if(s){const x=shop[+s.dataset.s];x.d=x.d?0:1;save();render();return}
+  const sh=e.target.closest('[data-share]');if(sh){const en=diary.find(x=>x.id==sh.dataset.share);const text=`${en.date} 做了：${en.dishes.join('、')}${en.note?'\n'+en.note:''}`;
+    try{if(en.photo&&navigator.canShare){const file=await dataUrlToFile(en.photo,'饭菜.jpg');if(navigator.canShare({files:[file]})){await navigator.share({files:[file],text});return}}if(navigator.share){await navigator.share({text});return}}catch(err){if(err&&err.name==='AbortError')return}
+    sh.textContent='这台手机不支持直接分享，可长按照片保存';return}
+  const cv=e.target.closest('[data-cv]');if(cv){const en=diary.find(x=>x.id==cv.dataset.cv);try{const small=await new Promise(ok=>{const im=new Image();im.onload=()=>{const k=Math.min(1,900/Math.max(im.width,im.height));const cc=document.createElement('canvas');cc.width=im.width*k;cc.height=im.height*k;cc.getContext('2d').drawImage(im,0,0,cc.width,cc.height);ok(cc.toDataURL('image/jpeg',0.82))};im.src=en.photo});covers[en.dishes[0]]=small;await idb('covers','readwrite',st=>st.put(small,en.dishes[0]));cv.textContent='已设为封面 ✓'}catch(err){}return}
+  const dd=e.target.closest('[data-dd]');if(dd){if(dd.dataset.c){const id=+dd.dataset.dd;try{await idb('diary','readwrite',st=>st.delete(id))}catch(err){}diary=diary.filter(x=>x.id!==id);render()}else{dd.dataset.c=1;dd.textContent='再点一次确认删除'}return}
   if(e.target.id==='clrDone'){shop=shop.filter(x=>!x.d);save();render()}
   if(e.target.id==='clrAll'){const b=e.target;if(b.dataset.c){shop=[];save();render()}else{b.dataset.c=1;b.textContent='再点一次确认'}}
-  if(e.target.id==='copyShop'){const txt=shop.filter(x=>!x.d).map(x=>x.n+' '+x.a).join('\n');navigator.clipboard.writeText(txt).then(()=>$('#cmsg').textContent='已复制，可以粘贴到微信发给家人').catch(()=>$('#cmsg').textContent='复制没成功，可以截图发送')}
-  if(e.target.id==='addNew'){cur=null;view='edit';render()}
+  if(e.target.id==='copyShop'){const txt='【买菜清单】\n'+shop.filter(x=>!x.d).map(x=>'· '+x.n+' '+x.a).join('\n');share(txt)}
+  if(e.target.id==='addNew'){cur=null;sub('edit','添加菜谱')}
+  const idt=e.target.closest('button')&&e.target.closest('button').id;
+  if(idt==='fridgeGo'){sub('fridge','家里有什么');return}
+  if(idt==='favGo'){cat='收藏';render();return}
+  if(idt==='pMinus'||idt==='pPlus'){people=Math.min(20,Math.max(1,people+(idt==='pPlus'?1:-1)));save();if(sug)genMenu();render();return}
+  if(idt==='genGo'||idt==='genAgain'){genMenu();render();return}
+  if(idt==='genTake'){sug.forEach(r=>{if(!inMenu(r.n))menu.items.push({n:r.n,by:me})});save();sug=null;banner='已加入今日菜单';setNav('menu');return}
+  const pb=e.target.closest('[data-p]');if(pb){const l=pb.dataset.p;pantry=pantry.includes(l)?pantry.filter(x=>x!==l):[...pantry,l];store.set('ck_pantry',pantry);const y=scrollY;render();scrollTo(0,y);return}
 });
 $('#tstop').onclick=()=>{clearInterval(tm);$('#timer').hidden=true};
 $('#nav').onclick=e=>{const b=e.target.closest('button');if(b)setNav(b.dataset.v)};
-$('#back').onclick=()=>{if(view==='edit'&&cur&&cur.mine){view='detail';$('#ttl').textContent=cur.n;render()}else setNav(view==='edit'?'mine':prev)};
-render();
+$('#back').onclick=()=>{if(view==='edit'&&cur&&cur.mine&&$('#ttl').textContent==='修改菜谱'){view='detail';$('#ttl').textContent=cur.n;render()}else setNav(prev)};
+document.addEventListener('visibilitychange',async()=>{if(document.visibilityState==='visible'&&$('#wakeBtn')&&$('#wakeBtn').textContent.includes('：开')&&!wake){try{wake=await navigator.wakeLock.request('screen')}catch(e){}}});
+/* 从点菜链接打开 */
+try{const p=new URLSearchParams(location.search);const o=p.get('order');if(o){const by=p.get('by')||'';let n=0;o.split('|').forEach(nm=>{if(byName(nm)&&!inMenu(nm)){menu.items.push({n:nm,by});n++}});save();banner=n?`收到${by?by+'点的':''} ${n} 道菜，已加入今日菜单`:'';history.replaceState(null,'',appUrl());if(n){view='menu';prev='menu';document.querySelectorAll('#nav button').forEach(b=>b.classList.toggle('act',b.dataset.v==='menu'));$('#ttl').textContent='今日菜单'}}}catch(e){}
+render();loadImages();
 }
 </script>
 </body>
