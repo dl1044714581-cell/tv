@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="家常菜谱">
+<meta name="theme-color" content="#c8402b">
+<link rel="apple-touch-icon" href="cook-icon-180.png">
+<link rel="manifest" href="cook-manifest.json">
+<title>家常菜谱</title>
+<style>
+/* VOICE: 温暖、实用、像厨房里贴的菜谱卡
+   IDEA: 一叠菜谱卡片 + 做菜时的步骤计时
+   PICTURE: 顶部辣椒红标题栏，下面是菜谱卡片列表
+   COLOUR and TYPE: 暖白底、酱油棕字、辣椒红强调；系统中文字体，大字号便于做菜时看
+   LAYOUT: 顶栏 → 分类 → 列表；详情页：食材勾选 → 步骤带计时 */
+:root{--bg:#fbf6ee;--card:#fff;--ink:#3a2a1e;--dim:#8a7462;--red:#c8402b;--line:#eadfce;--green:#3f7d4e}
+@media(prefers-color-scheme:dark){:root:not([data-theme=light]){--bg:#1d1714;--card:#2a221d;--ink:#f3e9dc;--dim:#b09a86;--line:#3d322a}}
+:root[data-theme=dark]{--bg:#1d1714;--card:#2a221d;--ink:#f3e9dc;--dim:#b09a86;--line:#3d322a}
+*{box-sizing:border-box;min-width:0}
+body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.6 -apple-system,"PingFang SC","Noto Sans SC",sans-serif;overflow-x:clip;padding-bottom:env(safe-area-inset-bottom)}
+header{background:var(--red);color:#fff;padding:calc(env(safe-area-inset-top) + 14px) 16px 14px;position:sticky;top:0;z-index:5;display:flex;align-items:center;gap:10px}
+header h1{font-size:22px;margin:0;flex:1}
+header button{background:#ffffff26;color:#fff;border:0}
+.wrap{max-width:760px;margin:0 auto;padding:0 14px 170px}
+button{font:inherit;color:var(--ink);background:var(--card);border:1px solid var(--line);border-radius:12px;min-height:44px;padding:0 14px;cursor:pointer}
+button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible{outline:2px solid var(--red);outline-offset:2px}
+.pri{background:var(--red);border-color:var(--red);color:#fff;font-weight:600}
+input,textarea,select{font:inherit;font-size:16px;color:var(--ink);background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 12px;width:100%}
+textarea{min-height:110px;line-height:1.5}
+.search{margin:14px 0 8px}
+.chips{display:flex;gap:8px;overflow-x:auto;padding:4px 0 10px;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.chips button{flex:none;border-radius:999px;min-height:38px}
+.chips .act{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px 16px;margin:10px 0;display:flex;gap:14px;align-items:center;cursor:pointer}
+.card .em{width:52px;height:52px;border-radius:14px;background:var(--red);color:#fff;display:grid;place-items:center;font-size:22px;font-weight:700;flex:none}
+.card .t{flex:1}.card b{font-size:18px;display:block}
+.meta{color:var(--dim);font-size:14px}
+.fav{border:0;background:none;font-size:24px;color:var(--dim);min-width:44px;padding:0}
+.fav.y{color:#e0a419}
+.empty{color:var(--dim);text-align:center;padding:40px 10px}
+h2{font-size:26px;line-height:1.2;margin:18px 0 4px}
+h3{font-size:19px;margin:22px 0 8px}
+.ing{list-style:none;padding:0;margin:0}
+.ing li{display:flex;gap:12px;align-items:center;padding:10px 4px;border-bottom:1px solid var(--line);cursor:pointer}
+.ing li span:last-child{margin-left:auto;color:var(--dim);white-space:nowrap}
+.box{width:24px;height:24px;border:2px solid var(--dim);border-radius:7px;flex:none;display:grid;place-items:center;color:#fff;font-size:15px}
+.done .box{background:var(--green);border-color:var(--green)}
+.done span:nth-child(2){text-decoration:line-through;color:var(--dim)}
+.steps{list-style:none;padding:0;margin:0;counter-reset:s}
+.steps li{position:relative;padding:12px 0 12px 46px;border-bottom:1px solid var(--line);font-size:18px}
+.steps li::before{counter-increment:s;content:counter(s);position:absolute;left:0;top:12px;width:32px;height:32px;border-radius:50%;background:var(--red);color:#fff;display:grid;place-items:center;font-size:16px;font-weight:700}
+.steps li.cur{background:#c8402b14}
+.tbtn{margin-top:8px;min-height:38px;font-size:15px;color:var(--red);border-color:var(--red)}
+.row{display:flex;gap:10px;flex-wrap:wrap;margin:12px 0}
+.timer{position:fixed;left:12px;right:12px;bottom:calc(68px + env(safe-area-inset-bottom));max-width:520px;margin:0 auto;background:var(--ink);color:var(--bg);border-radius:18px;padding:12px 16px;display:flex;align-items:center;gap:12px;z-index:9;box-shadow:0 8px 30px #0005}
+.timer .big{font-size:32px;font-weight:700;font-variant-numeric:tabular-nums}
+.timer .lbl{flex:1;font-size:14px;overflow-wrap:anywhere}
+.timer button{background:transparent;color:var(--bg);border-color:#ffffff55}
+.timer.ring{background:var(--red);animation:pulse 1s infinite}
+@keyframes pulse{50%{transform:scale(1.03)}}
+@media(prefers-reduced-motion:reduce){.timer.ring{animation:none}}
+nav{position:fixed;left:0;right:0;bottom:0;background:var(--card);border-top:1px solid var(--line);display:flex;padding-bottom:env(safe-area-inset-bottom);z-index:6}
+nav button{flex:1;border:0;border-radius:0;background:none;min-height:56px;font-size:15px;color:var(--dim)}
+nav .act{color:var(--red);font-weight:700}
+.note{font-size:13px;color:var(--dim);margin:14px 0}
+label.f{display:block;margin:14px 0 6px;font-weight:600}
+.shop li{cursor:pointer}
+</style>
+</head>
+<body>
+<header><h1 id="ttl">家常菜谱</h1><button id="back" hidden>‹ 返回</button></header>
+<div class="wrap" id="app"></div>
+<div class="timer" id="timer" hidden><div class="big" id="tnum">00:00</div><div class="lbl" id="tlbl"></div><button id="tstop">停止</button></div>
+<nav id="nav">
+  <button data-v="list" class="act">菜谱</button>
+  <button data-v="favs">收藏</button>
+  <button data-v="shop">买菜清单</button>
+  <button data-v="mine">我的菜</button>
+</nav>
+<script>
+{
+const R=[
+{n:'番茄炒蛋',c:'素菜',t:10,i:[['番茄','2个'],['鸡蛋','3个'],['葱','1根'],['盐','适量'],['糖','1小勺']],s:['番茄切块，鸡蛋加少许盐打散，葱切花','热锅多放点油，倒入蛋液炒到刚凝固，盛出','锅里补一点油，下番茄中火翻炒出汁（3分钟）','加盐、糖调味，倒回鸡蛋翻匀，撒葱花出锅']},
+{n:'可乐鸡翅',c:'荤菜',t:30,i:[['鸡翅中','10个'],['可乐','1罐'],['生抽','2勺'],['老抽','半勺'],['姜','3片'],['料酒','1勺']],s:['鸡翅两面各划两刀，冷水下锅加料酒、姜片焯水（3分钟），捞出洗净','锅里少许油，鸡翅煎到两面金黄','加生抽、老抽翻炒上色，倒入可乐没过鸡翅','大火烧开后转中小火炖（15分钟）','大火收汁到浓稠即可']},
+{n:'红烧肉',c:'荤菜',t:80,i:[['五花肉','500克'],['冰糖','15颗'],['生抽','2勺'],['老抽','1勺'],['料酒','2勺'],['姜','4片'],['八角','2个'],['葱','2根']],s:['五花肉切麻将块，冷水下锅加料酒焯水（5分钟），捞出洗净','锅里少许油，小火放冰糖炒到枣红色','下肉块翻炒均匀上糖色','加生抽、老抽、姜、葱、八角，倒热水没过肉','大火烧开转小火慢炖（60分钟）','大火收汁，汤汁裹满肉块出锅']},
+{n:'鱼香肉丝',c:'荤菜',t:25,i:[['猪里脊','250克'],['木耳','一小把'],['胡萝卜','半根'],['青椒','1个'],['郫县豆瓣酱','1勺'],['醋','2勺'],['糖','2勺'],['生抽','1勺'],['淀粉','1勺'],['蒜姜葱','适量']],s:['肉切丝，加少许盐、料酒、淀粉抓匀腌（10分钟）','调鱼香汁：醋2、糖2、生抽1、淀粉1、水3勺搅匀','热油滑炒肉丝变色盛出','下豆瓣酱和蒜姜炒出红油，放木耳、胡萝卜、青椒丝炒软','倒回肉丝，淋入鱼香汁大火翻匀出锅']},
+{n:'宫保鸡丁',c:'荤菜',t:25,i:[['鸡腿肉','300克'],['花生米','一把'],['干辣椒','8个'],['花椒','一小撮'],['葱','2根'],['醋','1勺'],['糖','1勺'],['生抽','1勺'],['淀粉','1勺']],s:['鸡肉切丁，加少许盐、料酒、淀粉腌（10分钟）','调汁：醋、糖、生抽各1勺，淀粉半勺，水2勺','冷油下花生米小火炸酥捞出','留底油小火炒香干辣椒和花椒，下鸡丁炒变色','加葱段，倒料汁翻匀，最后放花生米']},
+{n:'麻婆豆腐',c:'素菜',t:20,i:[['嫩豆腐','1盒'],['牛肉末','100克'],['郫县豆瓣酱','1勺'],['花椒粉','适量'],['蒜','3瓣'],['淀粉','1勺'],['葱','1根']],s:['豆腐切小块，放加盐的开水里焯一下（2分钟）捞出','热油炒肉末到酥，下豆瓣酱和蒜末炒出红油','加一碗水烧开，轻轻放入豆腐，小火煮（5分钟）','淀粉水分两次勾芡，轻推不要翻','出锅撒花椒粉和葱花']},
+{n:'青椒土豆丝',c:'素菜',t:15,i:[['土豆','2个'],['青椒','1个'],['干辣椒','3个'],['醋','1勺'],['盐','适量'],['蒜','2瓣']],s:['土豆切细丝，清水泡洗两遍去淀粉，沥干','青椒切丝，蒜切片','热油下蒜片、干辣椒炒香','下土豆丝大火快炒（2分钟），沿锅边淋醋','放青椒丝、盐，翻炒半分钟出锅']},
+{n:'蒜蓉西兰花',c:'素菜',t:10,i:[['西兰花','1颗'],['蒜','5瓣'],['盐','适量'],['蚝油','1勺']],s:['西兰花掰小朵，淡盐水泡（10分钟）洗净','开水加几滴油和盐，西兰花焯（1分钟）捞出','热油炒香蒜末，下西兰花大火翻炒','加盐、蚝油翻匀出锅']},
+{n:'清蒸鱼',c:'荤菜',t:25,i:[['鲈鱼','1条'],['葱','3根'],['姜','1块'],['蒸鱼豉油','3勺'],['料酒','1勺']],s:['鱼处理干净，两面划刀，抹料酒，肚子和刀口塞姜片葱段','水开后上锅大火蒸（8分钟），关火再焖（2分钟）','倒掉盘里的水，拿掉旧葱姜，铺上新葱丝姜丝','淋蒸鱼豉油，烧一勺滚油浇上去']},
+{n:'糖醋排骨',c:'荤菜',t:50,i:[['小排','500克'],['冰糖','20克'],['醋','4勺'],['生抽','2勺'],['料酒','2勺'],['姜','3片'],['白芝麻','少许']],s:['排骨冷水下锅加料酒焯水（5分钟），捞出洗净','锅里少许油，排骨煎到微黄','加姜片、料酒、生抽、2勺醋，倒热水没过排骨','加冰糖，大火烧开转小火炖（30分钟）','大火收汁，再加2勺醋翻匀，撒芝麻']},
+{n:'紫菜蛋花汤',c:'汤',t:8,i:[['紫菜','一小块'],['鸡蛋','1个'],['虾皮','一小把'],['葱','1根'],['香油','几滴'],['盐','适量']],s:['紫菜撕小块，和虾皮一起放汤碗里','鸡蛋打散','水烧开，转小火慢慢淋入蛋液，等几秒再推开','加盐，冲进汤碗，撒葱花、滴香油']},
+{n:'西红柿牛腩',c:'荤菜',t:100,i:[['牛腩','500克'],['西红柿','3个'],['洋葱','半个'],['番茄酱','2勺'],['姜','3片'],['料酒','2勺'],['盐','适量']],s:['牛腩切块，冷水下锅加料酒焯水（5分钟），捞出洗净','西红柿去皮切块，洋葱切块','油炒洋葱和一半西红柿出汁，加番茄酱','放牛腩、姜，加热水没过，大火烧开转小火炖（80分钟）','放剩下的西红柿再煮（10分钟），加盐调味']},
+{n:'蛋炒饭',c:'主食',t:10,i:[['剩米饭','1碗'],['鸡蛋','2个'],['葱','2根'],['火腿或青豆','适量'],['盐','适量'],['生抽','半勺']],s:['米饭用手抓散，鸡蛋打散，葱切花','热油下蛋液炒散盛出','下火腿或青豆炒一下，倒米饭大火炒到粒粒分开','倒回鸡蛋，加盐、生抽翻匀，撒葱花']},
+{n:'葱油拌面',c:'主食',t:20,i:[['面条','1人份'],['小葱','8根'],['生抽','3勺'],['老抽','1勺'],['糖','1勺']],s:['小葱切段，葱白葱绿分开','冷油下葱白小火慢炸，再下葱绿，炸到焦黄（8分钟）','加生抽、老抽、糖，小火煮到冒小泡，关火','面条煮熟捞出，加两勺葱油拌匀']},
+{n:'凉拌黄瓜',c:'凉菜',t:10,i:[['黄瓜','2根'],['蒜','4瓣'],['醋','2勺'],['生抽','1勺'],['糖','半勺'],['香油','几滴'],['辣椒油','适量']],s:['黄瓜拍碎切段，加少许盐腌（5分钟），倒掉出的水','蒜切末','加蒜末、醋、生抽、糖、香油、辣椒油拌匀']},
+{n:'地三鲜',c:'素菜',t:25,i:[['茄子','1根'],['土豆','1个'],['青椒','1个'],['生抽','2勺'],['糖','1勺'],['淀粉','1勺'],['蒜','3瓣']],s:['茄子、土豆切滚刀块，青椒切块','调汁：生抽2、糖1、淀粉1、水3勺','土豆煎到金黄熟透盛出，茄子裹薄薄一层淀粉煎软盛出','炒香蒜末，倒回土豆、茄子和青椒','倒料汁大火翻匀出锅']},
+{n:'回锅肉',c:'荤菜',t:40,i:[['带皮五花肉','300克'],['蒜苗','3根'],['郫县豆瓣酱','1勺'],['甜面酱','半勺'],['姜','3片'],['料酒','1勺']],s:['五花肉整块冷水下锅，加姜和料酒煮（20分钟），筷子能扎透','晾凉切薄片，蒜苗切段','少许油把肉片煸到微卷出油','下豆瓣酱、甜面酱炒出红油','放蒜苗翻炒到断生出锅']},
+{n:'白灼虾',c:'荤菜',t:10,i:[['鲜虾','500克'],['姜','4片'],['葱','2根'],['料酒','1勺'],['生抽','2勺'],['蒜','3瓣']],s:['虾洗净，剪掉虾须','水里放姜片、葱段、料酒烧开','下虾煮到变红弯曲（2分钟）立刻捞出','蘸汁：蒜末加生抽，淋一勺热油']},
+{n:'冬瓜排骨汤',c:'汤',t:70,i:[['排骨','400克'],['冬瓜','500克'],['姜','4片'],['葱','1根'],['盐','适量']],s:['排骨冷水下锅焯水（5分钟），捞出洗净','排骨、姜片放锅里，加足量水，大火烧开转小火炖（45分钟）','冬瓜去皮切块放进去再煮（15分钟）','加盐调味，撒葱花']},
+{n:'清炒小青菜',c:'素菜',t:5,i:[['小青菜','一把'],['蒜','3瓣'],['盐','适量']],s:['青菜洗净沥干，蒜拍碎','锅烧热多放点油，炒香蒜','下青菜大火快炒（1分钟）到变软','加盐翻匀马上出锅']}
+];
+const CATS=['全部','荤菜','素菜','汤','主食','凉菜'];
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const store={get(k,d){try{return JSON.parse(localStorage.getItem(k))??d}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
+let mine=store.get('ck_mine',[]),favs=store.get('ck_favs',[]),shop=store.get('ck_shop',[]);
+let prev='list',view='list',cat='全部',q='',cur=null,checked={},tm=null,tLeft=0,wake=null;
+const all=()=>[...mine.map(r=>({...r,mine:1})),...R];
+const byName=n=>all().find(r=>r.n===n);
+const mins=s=>{const m=s.match(/（(\d+)分钟）/);return m?+m[1]:0};
+const save=()=>{store.set('ck_mine',mine);store.set('ck_favs',favs);store.set('ck_shop',shop)};
+
+function setNav(v){view=v;prev=v;document.querySelectorAll('#nav button').forEach(b=>b.classList.toggle('act',b.dataset.v===v));$('#back').hidden=true;$('#ttl').textContent={list:'家常菜谱',favs:'我的收藏',shop:'买菜清单',mine:'我的菜'}[v];render()}
+function cardHtml(r){const f=favs.includes(r.n);return `<div class="card" data-n="${esc(r.n)}"><div class="em">${esc(r.n.slice(0,1))}</div><div class="t"><b>${esc(r.n)}</b><span class="meta">${esc(r.c)} · 约 ${r.t||'?'} 分钟 · ${r.i.length} 样食材${r.mine?' · 我加的':''}</span></div><button class="fav ${f?'y':''}" data-f="${esc(r.n)}" aria-label="收藏">${f?'★':'☆'}</button></div>`}
+function render(){
+  const A=$('#app');
+  if(view==='list'){
+    const list=all().filter(r=>(cat==='全部'||r.c===cat)&&(!q||(r.n+r.i.map(x=>x[0]).join('')).includes(q)));
+    A.innerHTML=`<input class="search" id="q" type="search" placeholder="搜菜名或食材，比如：鸡蛋、土豆" value="${esc(q)}">
+    <div class="chips">${CATS.map(c=>`<button data-c="${c}" class="${c===cat?'act':''}">${c}</button>`).join('')}</div>
+    ${list.length?list.map(cardHtml).join(''):'<p class="empty">没找到，换个词试试</p>'}`;
+    const qi=$('#q');qi.oninput=e=>{q=e.target.value.trim();const pos=qi.selectionStart;render();const n=$('#q');n.focus();try{n.setSelectionRange(pos,pos)}catch(e){}};
+  }else if(view==='favs'){
+    const list=favs.map(byName).filter(Boolean);
+    A.innerHTML=list.length?list.map(cardHtml).join(''):'<p class="empty">还没有收藏。点菜谱右边的 ☆ 就能收藏。</p>';
+  }else if(view==='shop'){
+    A.innerHTML=shop.length?`<h3>要买的东西（点一下划掉）</h3><ul class="ing shop">${shop.map((x,i)=>`<li data-s="${i}" class="${x.d?'done':''}"><span class="box">${x.d?'✓':''}</span><span>${esc(x.n)}</span><span>${esc(x.a)}</span></li>`).join('')}</ul>
+      <div class="row"><button id="clrDone">清掉已买的</button><button id="clrAll">全部清空</button><button id="copyShop">复制清单</button></div><p class="note" id="cmsg"></p>`
+      :'<p class="empty">清单是空的。打开一道菜，点"加到买菜清单"。</p>';
+  }else if(view==='mine'){
+    A.innerHTML=`<div class="row"><button class="pri" id="addNew">＋ 添加我自己的菜</button></div>${mine.length?mine.map(r=>cardHtml({...r,mine:1})).join(''):'<p class="empty">把家里的拿手菜记下来，以后就不会忘了。</p>'}`;
+  }else if(view==='detail')detail();
+  else if(view==='edit')editForm();
+}
+function open(n){cur=byName(n);if(!cur)return;if(view!=='detail'&&view!=='edit')prev=view;checked={};view='detail';$('#back').hidden=false;$('#ttl').textContent=cur.n;render();scrollTo(0,0)}
+function detail(){
+  const r=cur,f=favs.includes(r.n);
+  $('#app').innerHTML=`<h2>${esc(r.n)}</h2><div class="meta">${esc(r.c)} · 约 ${r.t||'?'} 分钟</div>
+  <div class="row"><button class="fav ${f?'y':''}" data-f="${esc(r.n)}" style="border:1px solid var(--line);border-radius:12px;padding:0 14px;font-size:16px">${f?'★ 已收藏':'☆ 收藏'}</button><button id="toShop">加到买菜清单</button><button id="wakeBtn">${wake?'屏幕常亮：开':'做菜时屏幕常亮'}</button></div>
+  <h3>食材（备好一样点一下）</h3><ul class="ing">${r.i.map((x,k)=>`<li data-k="${k}" class="${checked[k]?'done':''}"><span class="box">${checked[k]?'✓':''}</span><span>${esc(x[0])}</span><span>${esc(x[1])}</span></li>`).join('')}</ul>
+  <h3>步骤</h3><ol class="steps">${r.s.map((s,k)=>{const m=mins(s);return `<li>${esc(s)}${m?`<br><button class="tbtn" data-m="${m}" data-k="${k}">⏱ 计时 ${m} 分钟</button>`:''}</li>`}).join('')}</ol>
+  ${r.mine?`<div class="row"><button id="edit">修改</button><button id="del">删除</button></div>`:''}
+  <p class="note">用量是家常参考，按自家口味增减。</p>`;
+  $('#toShop').onclick=()=>{r.i.forEach(([n,a])=>{if(!shop.some(x=>x.n===n))shop.push({n,a,d:0})});save();$('#toShop').textContent='已加入 ✓'};
+  $('#wakeBtn').onclick=toggleWake;
+  if(r.mine){$('#edit').onclick=()=>{view='edit';render()};
+    $('#del').onclick=()=>{const b=$('#del');if(b.dataset.c){mine=mine.filter(x=>x.n!==r.n);favs=favs.filter(x=>x!==r.n);save();setNav('mine')}else{b.dataset.c=1;b.textContent='再点一次确认删除'}}}
+}
+function editForm(){
+  const r=cur&&cur.mine?cur:{n:'',c:'荤菜',t:'',i:[],s:[]};
+  $('#back').hidden=false;$('#ttl').textContent=r.n?'修改菜谱':'添加菜谱';
+  $('#app').innerHTML=`<form id="ef"><label class="f" for="en">菜名</label><input id="en" required value="${esc(r.n)}" placeholder="比如：妈妈的红烧鱼">
+  <label class="f" for="ec">分类</label><select id="ec">${CATS.slice(1).map(c=>`<option ${c===r.c?'selected':''}>${c}</option>`).join('')}</select>
+  <label class="f" for="et">大约多少分钟</label><input id="et" type="number" inputmode="numeric" value="${esc(r.t)}">
+  <label class="f" for="ei">食材（一行一样，名称和用量中间空一格）</label><textarea id="ei" placeholder="鸡蛋 3个&#10;番茄 2个">${esc(r.i.map(x=>x.join(' ')).join('\n'))}</textarea>
+  <label class="f" for="es">步骤（一行一步；要计时就写成"（10分钟）"）</label><textarea id="es" style="min-height:160px" placeholder="番茄切块&#10;小火炖（10分钟）">${esc(r.s.join('\n'))}</textarea>
+  <div class="row"><button class="pri" type="submit">保存</button></div><p class="note" id="emsg"></p></form>`;
+  $('#ef').onsubmit=e=>{e.preventDefault();
+    const n=$('#en').value.trim();if(!n)return;
+    if(n!==r.n&&all().some(x=>x.n===n)){$('#emsg').textContent='已经有同名的菜了，换个名字吧';return}
+    const rec={n,c:$('#ec').value,t:+$('#et').value||0,
+      i:$('#ei').value.split('\n').map(l=>l.trim()).filter(Boolean).map(l=>{const p=l.split(/\s+/);return [p[0],p.slice(1).join(' ')||'适量']}),
+      s:$('#es').value.split('\n').map(l=>l.trim().replace(/\((\d+)分钟\)/,'（$1分钟）')).filter(Boolean)};
+    if(r.n){mine=mine.map(x=>x.n===r.n?rec:x);favs=favs.map(x=>x===r.n?n:x)}else mine.unshift(rec);
+    save();open(n)};
+}
+function startTimer(m,label){
+  clearInterval(tm);tLeft=m*60;const T=$('#timer');T.hidden=false;T.classList.remove('ring');$('#tlbl').textContent=label;
+  const end=Date.now()+tLeft*1000;const tick=()=>{tLeft=Math.max(0,Math.round((end-Date.now())/1000));$('#tnum').textContent=String(Math.floor(tLeft/60)).padStart(2,'0')+':'+String(tLeft%60).padStart(2,'0');if(!tLeft){clearInterval(tm);T.classList.add('ring');$('#tlbl').textContent='时间到！'+label;beep()}};
+  tick();tm=setInterval(tick,500);
+}
+let actx=null;
+function beep(){try{actx=actx||new (window.AudioContext||window.webkitAudioContext)();for(let k=0;k<6;k++){const o=actx.createOscillator(),g=actx.createGain();o.frequency.value=880;o.connect(g);g.connect(actx.destination);const t0=actx.currentTime+k*0.5;g.gain.setValueAtTime(0.3,t0);g.gain.setValueAtTime(0,t0+0.25);o.start(t0);o.stop(t0+0.3)}}catch(e){}try{navigator.vibrate&&navigator.vibrate([300,200,300])}catch(e){}}
+async function toggleWake(){
+  try{if(wake){await wake.release();wake=null}else if('wakeLock' in navigator){wake=await navigator.wakeLock.request('screen');wake.addEventListener('release',()=>{wake=null})}else{$('#wakeBtn').textContent='这台手机不支持';return}}catch(e){$('#wakeBtn').textContent='没能开启';return}
+  $('#wakeBtn').textContent=wake?'屏幕常亮：开':'做菜时屏幕常亮';
+}
+document.addEventListener('visibilitychange',async()=>{if(wake===null&&document.visibilityState==='visible'&&$('#wakeBtn')&&$('#wakeBtn').textContent.includes('：开')){try{wake=await navigator.wakeLock.request('screen')}catch(e){}}});
+
+$('#app').addEventListener('click',e=>{
+  const f=e.target.closest('[data-f]');if(f){e.stopPropagation();const n=f.dataset.f;favs=favs.includes(n)?favs.filter(x=>x!==n):[n,...favs];save();render();return}
+  const c=e.target.closest('[data-c]');if(c){cat=c.dataset.c;render();return}
+  const card=e.target.closest('.card');if(card){open(card.dataset.n);return}
+  const li=e.target.closest('li[data-k]');if(li&&view==='detail'){checked[li.dataset.k]=!checked[li.dataset.k];render();return}
+  const t=e.target.closest('.tbtn');if(t){try{actx=actx||new (window.AudioContext||window.webkitAudioContext)();actx.resume()}catch(e){}document.querySelectorAll('.steps li').forEach((x,k)=>x.classList.toggle('cur',k==t.dataset.k));startTimer(+t.dataset.m,cur.n+' · 第'+(+t.dataset.k+1)+'步');return}
+  const s=e.target.closest('li[data-s]');if(s){const x=shop[+s.dataset.s];x.d=x.d?0:1;save();render();return}
+  if(e.target.id==='clrDone'){shop=shop.filter(x=>!x.d);save();render()}
+  if(e.target.id==='clrAll'){const b=e.target;if(b.dataset.c){shop=[];save();render()}else{b.dataset.c=1;b.textContent='再点一次确认'}}
+  if(e.target.id==='copyShop'){const txt=shop.filter(x=>!x.d).map(x=>x.n+' '+x.a).join('\n');navigator.clipboard.writeText(txt).then(()=>$('#cmsg').textContent='已复制，可以粘贴到微信发给家人').catch(()=>$('#cmsg').textContent='复制没成功，可以截图发送')}
+  if(e.target.id==='addNew'){cur=null;view='edit';render()}
+});
+$('#tstop').onclick=()=>{clearInterval(tm);$('#timer').hidden=true};
+$('#nav').onclick=e=>{const b=e.target.closest('button');if(b)setNav(b.dataset.v)};
+$('#back').onclick=()=>{if(view==='edit'&&cur&&cur.mine){view='detail';$('#ttl').textContent=cur.n;render()}else setNav(view==='edit'?'mine':prev)};
+render();
+}
+</script>
+</body>
+</html>
