@@ -60,6 +60,7 @@ h3{font-size:19px;margin:22px 0 8px}
 .steps li{position:relative;padding:12px 0 12px 46px;border-bottom:1px solid var(--line);font-size:18px}
 .steps li::before{counter-increment:s;content:counter(s);position:absolute;left:0;top:12px;width:32px;height:32px;border-radius:50%;background:var(--red);color:#fff;display:grid;place-items:center;font-size:16px;font-weight:700}
 .tbtn{margin-top:8px;min-height:38px;font-size:15px;color:var(--red);border-color:var(--red)}
+label.tbtn{display:inline-flex;align-items:center;background:var(--card)}
 .row{display:flex;gap:10px;flex-wrap:wrap;margin:12px 0}
 .panel{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px 16px;margin:14px 0}
 .panel h3{margin-top:0}
@@ -201,7 +202,8 @@ const ART={
 '凉菜':PLATE+[[60,72],[76,66],[92,70],[70,82],[88,82],[104,76]].map(([x,y])=>`<circle cx="${x}" cy="${y}" r="9" fill="#3d8a3c"/><circle cx="${x}" cy="${y}" r="6" fill="#bfe3a5"/><circle cx="${x}" cy="${y}" r="1.6" fill="#7ab45f"/>`).join('')+'<circle cx="82" cy="76" r="2.5" fill="#e85d3a"/><circle cx="68" cy="64" r="2.5" fill="#e85d3a"/><circle cx="98" cy="84" r="2.5" fill="#fff"/>'
 };
 function art(r){const h=hue(r.n);return `<svg viewBox="0 0 160 120" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><rect width="160" height="120" fill="hsl(${h} 55% 88%)"/><circle cx="140" cy="18" r="34" fill="hsl(${(h+40)%360} 60% 80%)"/>${ART[r.c]||ART['荤菜']}</svg>`}
-function coverHtml(r,cls){const p=covers[r.n];return p?`<div class="${cls}" style="background-image:url('${p}')"></div>`:`<div class="${cls}">${art(r)}</div>`}
+const PHOTOS={"糖醋里脊": "cp01.jpg", "红烧带鱼": "cp02.jpg", "蒜蓉粉丝蒸虾": "cp03.jpg", "虎皮青椒": "cp04.jpg", "山药炒木耳": "cp05.jpg", "酸菜鱼": "cp06.jpg", "油焖大虾": "cp07.jpg", "蒜苔炒肉": "cp08.jpg", "干煸四季豆": "cp09.jpg", "麻婆豆腐": "cp10.jpg", "手撕包菜": "cp11.jpg", "蚝油生菜": "cp12.jpg", "韭菜炒鸡蛋": "cp13.jpg", "干锅花菜": "cp14.jpg", "辣炒花甲": "cp15.jpg", "玉米排骨汤": "cp16.jpg", "西红柿鸡蛋汤": "cp17.jpg", "丝瓜蛋汤": "cp18.jpg", "西红柿鸡蛋面": "cp19.jpg", "鲫鱼豆腐汤": "cp20.jpg", "炸酱面": "cp21.jpg", "青椒肉丝": "cp22.jpg", "黄焖鸡": "cp23.jpg", "醋溜白菜": "cp24.jpg", "鸡蛋饼": "cp25.jpg", "水煮肉片": "cp26.jpg", "口水鸡": "cp27.jpg", "皮蛋豆腐": "cp28.jpg", "凉拌木耳": "cp29.jpg", "凉拌海带丝": "cp30.jpg", "京酱肉丝": "cp31.jpg", "辣椒炒肉": "cp33.jpg", "清炒小青菜": "cp34.jpg", "冬瓜排骨汤": "cp35.jpg", "白灼虾": "cp36.jpg", "回锅肉": "cp37.jpg", "可乐鸡翅": "cp41.jpg", "红烧肉": "cp42.jpg", "鱼香肉丝": "cp43.jpg", "宫保鸡丁": "cp44.jpg", "蒜蓉西兰花": "cp45.jpg", "清蒸鱼": "cp46.jpg", "糖醋排骨": "cp47.jpg", "紫菜蛋花汤": "cp48.jpg", "土豆烧牛肉": "cp49.jpg", "蛋炒饭": "cp50.jpg", "葱油拌面": "cp51.jpg", "凉拌黄瓜": "cp52.jpg", "地三鲜": "cp53.jpg"};
+function coverHtml(r,cls){const p=covers[r.n]||PHOTOS[r.n];return p?`<div class="${cls}" style="background-image:url('${p}')"></div>`:`<div class="${cls}">${art(r)}</div>`}
 const ACT=[
  [/腌|泡发|泡水|吐沙|泡软|泡（/,'腌·泡','<rect x="22" y="30" width="56" height="30" rx="6" fill="#fff" stroke="#c9b9a2" stroke-width="2"/><path d="M26 38h48" stroke="#e8d9c2" stroke-width="10"/><circle cx="84" cy="22" r="10" fill="#fff" stroke="#c8402b" stroke-width="2"/><path d="M84 16v6l4 3" stroke="#c8402b" stroke-width="2" fill="none"/>'],
  [/焯水|焯|烫|煮/,'煮·焯水','<path d="M20 34h60v18c0 8-6 12-14 12H34c-8 0-14-4-14-12z" fill="#9aa7b4"/><path d="M14 34h72" stroke="#7c8996" stroke-width="4" stroke-linecap="round"/><circle cx="40" cy="44" r="3" fill="#fff"/><circle cx="56" cy="40" r="4" fill="#fff"/><circle cx="62" cy="48" r="2.5" fill="#fff"/><path d="M34 26c-4-4 4-6 0-12M50 26c-4-4 4-6 0-12M66 26c-4-4 4-6 0-12" stroke="#b9c4ce" stroke-width="2.5" fill="none"/>'],
@@ -214,6 +216,7 @@ const ACT=[
  [/出锅|装盘|摆盘|撒|盛出|卷起/,'出锅·装盘','<ellipse cx="50" cy="50" rx="34" ry="12" fill="#fffdf8" stroke="#e6dccb" stroke-width="2"/><ellipse cx="50" cy="48" rx="22" ry="7" fill="#c8402b"/><circle cx="44" cy="46" r="2" fill="#6db55a"/><circle cx="56" cy="48" r="2" fill="#6db55a"/><path d="M40 30c-3-3 3-5 0-9M54 30c-3-3 3-5 0-9" stroke="#c9b9a2" stroke-width="2" fill="none"/>'],
  [/炒|翻|煸|滑/,'炒','<path d="M14 40h64c0 14-14 20-32 20S14 54 14 40z" fill="#3b4148"/><path d="M78 40h16" stroke="#3b4148" stroke-width="5" stroke-linecap="round"/><circle cx="36" cy="36" r="5" fill="#e85d3a"/><circle cx="50" cy="32" r="4" fill="#6db55a"/><rect x="54" y="34" width="9" height="6" rx="2" fill="#a3481d"/><path d="M30 64l-3 6M46 66v6M62 64l3 6" stroke="#e8743b" stroke-width="3" stroke-linecap="round"/>']
 ];
+function stepVis(r,j,s){const k=r.n+'#'+j;return covers[k]?`<img src="${covers[k]}" alt="第${j+1}步" style="width:100%;max-width:420px;border-radius:12px;margin-top:8px;display:block">`:stepArt(s)}
 function stepArt(s){const a=ACT.find(([re])=>re.test(s))||ACT[ACT.length-1];return `<figure style="margin:8px 0 0;display:flex;align-items:center;gap:10px"><svg viewBox="0 0 100 76" width="96" height="72" aria-hidden="true" style="background:var(--soft);border-radius:10px;flex:none">${a[2]}</svg><figcaption class="meta">${a[1]}</figcaption></figure>`}
 
 /* ---------- 本机图片库（IndexedDB） ---------- */
@@ -296,7 +299,7 @@ function render(){
     <div class="chips">${CATS.map(c=>`<button data-c="${c}" class="${c===cat?'act':''}">${c}</button>`).join('')}</div>
     ${cat==='我加的'?'<div class="row"><button class="pri" id="addNew">＋ 记下自己的拿手菜</button></div>':''}
     ${list.length?`<div class="grid">${list.map(dishCard).join('')}</div>`:`<p class="empty">${cat==='收藏'?'还没有收藏，打开一道菜点 ☆ 收藏':cat==='我加的'?'把家里的拿手菜记下来吧':'没找到，换个词试试'}</p>`}
-    <p class="note">共 ${all().length} 道菜。插图是示意；做完拍张照设成封面，就会显示你家做的样子。</p>`;
+    <p class="note">共 ${all().length} 道菜。没有照片的菜显示插图；做完拍张照设成封面，就会显示你家做的样子。</p>`;
     const qi=$('#q');qi.oninput=e=>{q=e.target.value.trim();const p=qi.selectionStart;render();const n=$('#q');n.focus();try{n.setSelectionRange(p,p)}catch(e){}};
   }else if(view==='detail')detail();
   else if(view==='edit')editForm();
@@ -312,19 +315,21 @@ function detail(){
   const r=cur,f=favs.includes(r.n),o=inMenu(r.n),k=encodeURIComponent(r.n+' 做法');
   $('#app').innerHTML=`${coverHtml(r,'cover hero')}<h2>${esc(r.n)}</h2><div class="meta">${esc(r.c)} · 约 ${r.t||'?'} 分钟</div>
   <div class="row"><button class="${o?'':'pri'}" data-o="${esc(r.n)}">${o?'✓ 已在今日菜单':'＋ 点这道菜'}</button><button data-f="${esc(r.n)}">${f?'★ 已收藏':'☆ 收藏'}</button>
-  <label class="filebtn" style="border:1px solid var(--line);border-radius:12px;min-height:44px;padding:0 14px;background:var(--card)">📷 拍照当封面<input type="file" accept="image/*" id="coverIn"></label>${covers[r.n]?'<button id="coverDel">恢复插图</button>':''}</div>
+  <label class="filebtn" style="border:1px solid var(--line);border-radius:12px;min-height:44px;padding:0 14px;background:var(--card)">📷 拍照当封面<input type="file" accept="image/*" id="coverIn"></label>${covers[r.n]?'<button id="coverDel">换回原图</button>':''}</div>
   <h3>食材（备好一样点一下）</h3><ul class="ing">${r.i.map((x,j)=>`<li data-k="${j}" class="${checked[j]?'done':''}"><span class="box">${checked[j]?'✓':''}</span><span class="nm">${esc(x[0])}</span><span class="amt">${esc(x[1])}</span></li>`).join('')}</ul>
   <div class="row"><button id="toShop">食材加到买菜清单</button><button id="wakeBtn">${wake?'屏幕常亮：开':'做菜时屏幕常亮'}</button></div>
-  <h3>步骤</h3><ol class="steps">${r.s.map((s,j)=>{const m=mins(s);return `<li>${esc(s)}${stepArt(s)}${m?`<button class="tbtn" data-m="${m}" data-l="${esc(r.n)} · 第${j+1}步">⏱ 计时 ${m} 分钟</button>`:''}</li>`}).join('')}</ol>
+  <h3>步骤</h3><ol class="steps">${r.s.map((s,j)=>{const m=mins(s);return `<li>${esc(s)}${stepVis(r,j,s)}<div class="row" style="margin:8px 0 0">${m?`<button class="tbtn" data-m="${m}" data-l="${esc(r.n)} · 第${j+1}步">⏱ 计时 ${m} 分钟</button>`:''}<label class="filebtn tbtn" style="border:1px solid var(--line);color:var(--dim);border-radius:12px;padding:0 12px">📷 ${covers[r.n+'#'+j]?'换这步的图':'给这步配图'}<input type="file" accept="image/*" data-sp="${j}"></label>${covers[r.n+'#'+j]?`<button class="tbtn" data-spdel="${j}" style="color:var(--dim);border-color:var(--line)">去掉</button>`:''}</div></li>`}).join('')}</ol>
   <h3>看视频教程</h3><div class="row">
    <a class="pri" style="display:inline-flex;align-items:center;padding:0 14px;min-height:44px;border-radius:12px;text-decoration:none;color:#fff;background:#fb7299" href="https://search.bilibili.com/all?keyword=${k}" target="_blank" rel="noopener">B站</a>
    <a style="display:inline-flex;align-items:center;padding:0 14px;min-height:44px;border-radius:12px;text-decoration:none;color:#fff;background:#161823" href="https://www.douyin.com/search/${k}" target="_blank" rel="noopener">抖音</a>
    <a style="display:inline-flex;align-items:center;padding:0 14px;min-height:44px;border-radius:12px;text-decoration:none;color:#fff;background:#d4322c" href="https://www.youtube.com/results?search_query=${k}" target="_blank" rel="noopener">YouTube</a></div>
   ${r.mine?`<div class="row"><button id="edit">修改</button><button id="del">删除</button></div>`:''}
-  <p class="note">用量是家常参考（约 2～3 人份），按自家口味增减。步骤小图是动作示意，真人演示请看视频。</p>`;
+  <p class="note">用量是家常参考（约 2～3 人份），按自家口味增减。步骤小图是动作示意，可以点「给这步配图」换成自己拍的照片；真人演示请看视频。</p>`;
   $('#toShop').onclick=()=>{addShop(r,1);$('#toShop').textContent='已加入 ✓'};
   $('#wakeBtn').onclick=toggleWake;
   $('#coverIn').onchange=async e=>{const f=e.target.files[0];if(!f)return;try{const u=await shrink(f,900);covers[r.n]=u;await idb('covers','readwrite',s=>s.put(u,r.n));render()}catch(err){alertBox('照片没存成功，换一张试试')}};
+  document.querySelectorAll('[data-sp]').forEach(inp=>inp.onchange=async e=>{const f=e.target.files[0];if(!f)return;const k=r.n+'#'+inp.dataset.sp;try{const u=await shrink(f,900);covers[k]=u;await idb('covers','readwrite',st=>st.put(u,k));const y=scrollY;render();scrollTo(0,y)}catch(err){alertBox('照片没存成功，换一张试试')}});
+  document.querySelectorAll('[data-spdel]').forEach(b=>b.onclick=async()=>{const k=r.n+'#'+b.dataset.spdel;delete covers[k];try{await idb('covers','readwrite',st=>st.delete(k))}catch(e){}const y=scrollY;render();scrollTo(0,y)});
   if($('#coverDel'))$('#coverDel').onclick=async()=>{delete covers[r.n];try{await idb('covers','readwrite',s=>s.delete(r.n))}catch(e){}render()};
   if(r.mine){$('#edit').onclick=()=>sub('edit','修改菜谱');
     $('#del').onclick=()=>{const b=$('#del');if(b.dataset.c){mine=mine.filter(x=>x.n!==r.n);favs=favs.filter(x=>x!==r.n);menu.items=menu.items.filter(x=>x.n!==r.n);save();cat='我加的';setNav('list')}else{b.dataset.c=1;b.textContent='再点一次确认删除'}}}
@@ -396,7 +401,7 @@ function cookView(){
   <div class="meta">第 ${d+1} 道 / 共 ${ds.length} 道 · 总进度 ${done}/${tot}</div>
   <div class="mi" style="border:0">${coverHtml(r,'th')}<div class="t"><b style="font-size:20px">${esc(r.n)}</b><div class="meta">第 ${s+1} 步 / 共 ${r.s.length} 步</div></div></div>
   ${s===0?`<details ${ck.showIng?'open':''} class="panel" id="ingBox"><summary><b>这道菜要备的料</b></summary><ul class="ing">${r.i.map(x=>`<li style="cursor:default"><span class="nm">${esc(x[0])}</span><span class="amt">${esc(scale(x[1],xOf(people)))}</span></li>`).join('')}</ul></details>`:''}
-  <div class="big">${esc(step)}</div>${stepArt(step)}
+  <div class="big">${esc(step)}</div>${stepVis(r,s,step)}
   ${m?`<button class="tbtn" data-m="${m}" data-l="${esc(r.n)} · 第${s+1}步" style="min-height:48px;font-size:17px">⏱ 计时 ${m} 分钟</button>`:''}
   <div class="row" style="margin-top:24px"><button id="pv" ${d===0&&s===0?'disabled':''} style="flex:1">‹ 上一步</button><button class="pri" id="nx" style="flex:2;min-height:56px;font-size:19px">${s===r.s.length-1?(d===ds.length-1?'做完了 ✓':'这道好了，下一道 ›'):'下一步 ›'}</button></div>
   <div class="row"><button id="wakeBtn">${wake?'屏幕常亮：开':'做菜时屏幕常亮'}</button></div>`;
@@ -436,7 +441,7 @@ function editForm(){
   <label class="f" for="ec">分类</label><select id="ec">${CATS.slice(3,9).map(c=>`<option ${c===r.c?'selected':''}>${c}</option>`).join('')}</select>
   <label class="f" for="et">大约多少分钟</label><input id="et" type="number" inputmode="numeric" value="${esc(r.t)}">
   <label class="f" for="ei">食材（一行一样，名称和用量中间空一格）</label><textarea id="ei" placeholder="鸡蛋 3个&#10;番茄 2个">${esc(r.i.map(x=>x.join(' ')).join('\n'))}</textarea>
-  <label class="f" for="es">步骤（一行一步；要计时就写"（10分钟）"）</label><textarea id="es" style="min-height:160px" placeholder="番茄切块&#10;小火炖（10分钟）">${esc(r.s.join('\n'))}</textarea>
+  <p class="note">不想打字：点键盘上的 🎤 话筒直接说，手机会自动转成文字；也可以从别处复制粘贴过来。</p><label class="f" for="es">步骤（一行一步；要计时就写"（10分钟）"）</label><textarea id="es" style="min-height:160px" placeholder="番茄切块&#10;小火炖（10分钟）">${esc(r.s.join('\n'))}</textarea>
   <div class="row"><button class="pri" type="submit">保存</button></div><p class="note" id="emsg"></p></form>`;
   $('#ef').onsubmit=e=>{e.preventDefault();const n=$('#en').value.trim();if(!n)return;
     if(n!==r.n&&all().some(x=>x.n===n)){$('#emsg').textContent='已经有同名的菜了，换个名字吧';return}
